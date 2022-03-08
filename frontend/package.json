@@ -1,0 +1,54 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:8000",
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "bootstrap": "^4.6.0",
+    "countries-list": "^2.6.1",
+    "country-list-js": "^3.1.7",
+    "jwt-decode": "^3.1.2",
+    "lang-list": "^1.0.3",
+    "language-list": "0.0.3",
+    "languages-list": "^1.0.2",
+    "react": "^17.0.2",
+    "react-console": "^1.0.0-rc.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.2.1",
+    "react-scripts": "4.0.3",
+    "react-select": "^5.2.1",
+    "react-toggle-button": "^2.2.0",
+    "reactstrap": "^8.9.0",
+    "universal-cookie": "^4.0.4",
+    "web-vitals": "^1.1.2",
+    "websocket": "^1.0.34"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
