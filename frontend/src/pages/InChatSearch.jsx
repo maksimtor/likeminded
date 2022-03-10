@@ -367,18 +367,45 @@ class InChatSearch extends Component {
     goals:'',
     genderPref: '',
     ageRange:[1,100],
-    ageOptimal: 25
+    ageOptimal: 25,
+    canUnblind: false,              // get data from api if partner is registered
+    unblindRequestSent: false,      
+    unblindRequestReceived: false,
+    unblinded: false
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
 
   onButtonClicked = (e) => {
+    const {user} =this.context;
     this.client.send(JSON.stringify({
-      type: "message",
+      type: "chat_message",
       message: this.state.value,
-      name: this.state.name
+      name: user.custom_user_id
     }));
     this.state.value = ''
+    e.preventDefault();
+  }
+
+  sendUnblindRequest = (e) => {
+    const {user} =this.context;
+    this.client.send(JSON.stringify({
+      type: "unblind_request",
+      message: user.custom_user_id,
+      name: 'name'
+    }));
+    this.state.unblindRequestSent = true;
+    e.preventDefault();
+  }
+
+  approveUnblindRequest = (e) => {
+    const {user} =this.context;
+    this.client.send(JSON.stringify({
+      type: "approve_request",
+      message: user.custom_user_id,
+      name: 'name'
+    }));
+    this.state.unblinded = true;
     e.preventDefault();
   }
 
@@ -406,16 +433,46 @@ class InChatSearch extends Component {
               this.setState({ room: room });
               this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
               this.client.onopen = () => {
-                console.log('WebSocket Client Connected');
+                this.client.send(JSON.stringify({
+                  type: "possible_unblind",
+                  message: user.custom_user_id,
+                  name: "name"
+                }));
               };
               this.client.onmessage = (message) => {
                 const dataFromServer = JSON.parse(message.data);
-                console.log('got reply! ', dataFromServer.type);
                 if (dataFromServer) {
                   if (dataFromServer.type === 'exit_message') {
                     this.setState({ isLoggedIn: false });
 
-                  } else {
+                  }
+                  else if (dataFromServer.type === 'possible_unblind'){
+                    alert('possible_unblind recieved')
+                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
+                      this.setState({ canUnblind: true })
+                      alert('state set')
+                    }
+                  }
+                  else if (dataFromServer.type === 'unblind_request'){
+                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
+                      this.setState({ unblindRequestReceived: true });
+                    }
+                  }
+                  else if (dataFromServer.type === 'approve_request'){
+                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
+                        fetch('http://localhost:8000/chat/create_chat_room/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({user1: user.custom_user_id, user2: dataFromServer.message}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                this.setState({ unblinded: true })
+                            }));
+                    }
+                  }
+                  else {
                     this.setState((state) =>
                       ({
                         messages: [...state.messages,
@@ -536,6 +593,35 @@ class InChatSearch extends Component {
               >
                 Start Chatting
                 </Button>
+              {this.state.canUnblind ?
+              <Button
+                  onClick={this.sendUnblindRequest}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Unblind
+                  </Button>
+                :
+                <div></div>
+                }
+
+              {this.state.unblindRequestReceived ?
+              <Button
+                  onClick={this.approveUnblindRequest}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Approve
+                  </Button>
+                :
+                <div></div>
+                }
             </form>
           </div>
 
@@ -547,8 +633,6 @@ class InChatSearch extends Component {
               <Typography component="h1" variant="h5">
                 ChattyRooms
                 </Typography>
-              <h3>Tell us about yourself :)</h3>
-              {this.state.geo}
               <form className={classes.form} noValidate>
                 
 

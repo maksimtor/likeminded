@@ -5,7 +5,7 @@ from django.http import Http404
 from django.template import loader
 from django.urls import reverse
 from django.db.models import Q
-from .models import CustomUser, Chat, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences, SearchingInstance
+from .models import CustomUser, Chat, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences, SearchingInstance, ChatRoom
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
 from .serializers import UserSerializer, ChatSerializer
 from rest_framework import viewsets
@@ -139,6 +139,19 @@ def get_user_chats(request):
         chat_ids.append(c.id)
     print(chat_ids)
     return JsonResponse({'chat_ids': chat_ids})
+
+@csrf_exempt
+def create_chat_room(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data['user1'])
+    user1_id = int(data['user1'])
+    print(data['user2'])
+    user2_id = int(data['user2'])
+    chat_room = ChatRoom.objects.create()
+    chat_room.participants.add(CustomUser.objects.get(id=user1_id))
+    chat_room.participants.add(CustomUser.objects.get(id=user2_id))
+    return JsonResponse({'chat_ids': ''})
 
 @csrf_exempt
 def create_user(request):

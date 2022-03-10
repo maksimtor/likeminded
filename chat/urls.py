@@ -16,6 +16,7 @@ urlpatterns = [
     # path('check_search/', views.checkRoom, name='check_search'),
     path('create_user/', views.create_user, name='create_user'),
     path('create_real_user/', views.create_real_user, name='create_real_user'),
+    path('create_chat_room/', views.create_chat_room, name='create_chat_room'),
     path('validate_user/', views.validate_user_does_not_exists, name='validate_user'),
     path('validate_login/', views.validate_login, name='validate_login'),
     path('get_user_profile/', views.get_user_profile, name='get_user_profile'),

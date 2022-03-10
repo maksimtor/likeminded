@@ -181,17 +181,80 @@ class ChatConsumer(WebsocketConsumer):
         message = text_data_json['message']
         name = text_data_json['name']
 
+        if (text_data_json['type'] == 'possible_unblind'):
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'possible_unblind',
+                    'message': message,
+                    'name': name
+                }
+            )
+
+        elif (text_data_json['type'] == 'unblind_request'):
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'unblind_request',
+                    'message': message,
+                    'name': name
+                }
+            )
+
+        elif (text_data_json['type'] == 'approve_request'):
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'approve_request',
+                    'message': message,
+                    'name': name
+                }
+            )
+
+        else :
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': message,
+                    'name': name
+                }
+            )
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'name': name
-            }
-        )
 
     # Receive message from room group
+    def possible_unblind(self, event):
+        message = event['message']
+        name = event['name']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'possible_unblind',
+            'message': message,
+            'name': name
+        }))
+
+    def approve_request(self, event):
+        message = event['message']
+        name = event['name']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'approve_request',
+            'message': message,
+            'name': name
+        }))
+
+    def unblind_request(self, event):
+        message = event['message']
+        name = event['name']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'unblind_request',
+            'message': message,
+            'name': name
+        }))
     def chat_message(self, event):
         message = event['message']
         name = event['name']

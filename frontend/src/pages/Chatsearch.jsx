@@ -371,7 +371,7 @@ class Chatsearch extends Component {
 
   onButtonClicked = (e) => {
     this.client.send(JSON.stringify({
-      type: "message",
+      type: "chat_message",
       message: this.state.value,
       name: this.state.name
     }));
