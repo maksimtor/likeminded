@@ -341,7 +341,7 @@ class Chatsearch extends Component {
     value: '',
     name: 'hey',
     age: '',
-    gender: 'M',
+    gender: { value: 'A', label: 'Other/Anything' },
     languages: [],
     interests: [],
     country: '',
@@ -361,8 +361,8 @@ class Chatsearch extends Component {
     locPref: false,
     areaPref: [],
     persPref: false,
-    goals:'',
-    genderPref: '',
+    goals:{ value: 'AN', label: 'Anything' },
+    genderPref: { value: 'A', label: 'Other/Anything' },
     ageRange:[1,100],
     ageOptimal: 25
   }

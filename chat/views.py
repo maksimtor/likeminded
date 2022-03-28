@@ -30,6 +30,27 @@ class ChatView(viewsets.ModelViewSet):
     serializer_class = ChatSerializer   
     queryset = Chat.objects.all()
 
+@csrf_exempt
+def get_most_like_minded(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data)
+    user_id = data['user_id']
+    user = User.objects.get(id=user_id)
+    userProfile = user.profile
+
+    users = User.objects.all()
+    accepted_users = [{'id': 0, 'like_mindness': 0}]
+    for u in users:
+        potential_profile = u.profile
+        if (calcAcceptance(mainUser=userProfile, targetUser=potential_profile) == 1 and calcAcceptance(mainUser=potential_profile, targetUser=userProfile) == 1):
+            l1 = calcLikeness(mainUser=userProfile, targetUser=potential_profile)
+            l2 = calcLikeness(mainUser=potential_profile, targetUser=userProfile)
+            result = (l1+l2)/2
+            accepted_users.append({'id': u.profile.id, 'like_mindness': result})
+    result_users = sorted(accepted_users, key=lambda d: d['like_mindness'], reverse=True)[0:2]
+    print(result_users)
+    return JsonResponse({'result': result_users})
 
 @csrf_exempt
 def validate_user_does_not_exists(request):
@@ -178,6 +199,7 @@ def create_user(request):
         userInterestsReformed.append(i['value'])
     userGeoLat = data['geoLat']
     userGeoLon = data['geoLon']
+    userLocToggle = data['locToggle']
     userPolEco = data['polEco']/10
     userPolGov = data['polGov']/10
     userPersonalityExtraversion = data['personalityExtraversion']/10
@@ -222,15 +244,18 @@ def create_user(request):
     personality.save()
     pol = PolitCoordinates.objects.create(eco=userPolEco, cult=userPolGov)
     pol.save()
-    geo = GeoCoordinates.objects.create(lat=userGeoLat, lon=userGeoLon)
-    geo.save()
+    geo = None
+    if (userLocToggle):
+        print('save geo')
+        geo = GeoCoordinates.objects.create(lat=userGeoLat, lon=userGeoLon)
+        geo.save()
     user_info = UserInfo.objects.create(
         country=userCountry,
         languages=userLanguagesReformed,
         interests=userInterestsReformed,
         polit_coordinates=pol,
         location=geo,
-        age=userAge,
+        age=userAge if isinstance(userAge, int) else None,
         gender=userGender,
         personality=personality
         )

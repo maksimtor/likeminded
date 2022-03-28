@@ -490,7 +490,7 @@ class Profile extends Component {
   }
   
   componentWillUpdate(nextProps, nextState) {
-    localStorage.setItem('user', JSON.stringify(nextState));
+    // localStorage.setItem('user', JSON.stringify(nextState));
   }
 
   render() {

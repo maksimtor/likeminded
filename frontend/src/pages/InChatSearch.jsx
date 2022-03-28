@@ -433,11 +433,16 @@ class InChatSearch extends Component {
               this.setState({ room: room });
               this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
               this.client.onopen = () => {
-                this.client.send(JSON.stringify({
-                  type: "possible_unblind",
-                  message: user.custom_user_id,
-                  name: "name"
-                }));
+                // this.client.send(JSON.stringify({
+                //   type: "possible_unblind",
+                //   message: user.custom_user_id,
+                //   name: "name"
+                // }));
+                setTimeout(() => this.client.send(JSON.stringify({
+                    type: "possible_unblind",
+                    message: user.custom_user_id,
+                    name: "name"
+                  })), 2000);
               };
               this.client.onmessage = (message) => {
                 const dataFromServer = JSON.parse(message.data);
@@ -447,18 +452,19 @@ class InChatSearch extends Component {
 
                   }
                   else if (dataFromServer.type === 'possible_unblind'){
-                    alert('possible_unblind recieved')
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
                       this.setState({ canUnblind: true })
-                      alert('state set')
                     }
                   }
                   else if (dataFromServer.type === 'unblind_request'){
+                    this.setState({ canUnblind: false })
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
                       this.setState({ unblindRequestReceived: true });
                     }
                   }
                   else if (dataFromServer.type === 'approve_request'){
+                    this.setState({ canUnblind: false })
+                    this.setState({unblindRequestReceived: false})
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
                         fetch('http://localhost:8000/chat/create_chat_room/', {
                           method: 'POST', // или 'PUT'
@@ -622,6 +628,7 @@ class InChatSearch extends Component {
                 :
                 <div></div>
                 }
+              {this.state.unblinded ? <div>Unblinded!</div> : <div></div>}
             </form>
           </div>
 

@@ -1,8 +1,11 @@
 from django.test import TestCase
-from chat.models import User, UserInfo, ChatGoal, PolitCoordinates, GeoCoordinates, Gender, Preferences, AgePref, Personality
+from chat.models import CustomUser, UserInfo, ChatGoal, PolitCoordinates, GeoCoordinates, Gender, Preferences, AgePref, Personality
+from django.contrib.auth.models import User
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
 from random import randrange
 import pycountry
+import string
+import random
 
 def create_random_user():
     # pol eco
@@ -47,6 +50,8 @@ def create_random_user():
         age_pref_opt = randrange(age_pref_min, age_pref_max)
         age_pref = AgePref.objects.create(min_age=age_pref_min, max_age=age_pref_max, optimal_age=age_pref_opt)
         age_pref.save()
+    else:
+        age_pref = AgePref.objects.create(min_age=18, max_age=100, optimal_age=20)
     # polit boolean
     polit = False
     if (randrange(0,4) != 1):
@@ -102,7 +107,13 @@ def create_random_user():
         loc_area=loc_area
         )
     user_pref.save()
-    user = User.objects.create(name="Maksimmas", userInfo=user_info, userPrefs=user_pref)
+    user = CustomUser.objects.create(name="Maksimmas", userInfo=user_info, userPrefs=user_pref)
+    user.save()
+
+    username = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
+    email = username + '@gmail.com'
+    real_user = User.objects.create_user(username=username, email=email, password='123')
+    user.user = real_user
     user.save()
     print(user)
     return user

@@ -21,6 +21,7 @@ urlpatterns = [
     path('validate_login/', views.validate_login, name='validate_login'),
     path('get_user_profile/', views.get_user_profile, name='get_user_profile'),
     path('get_user_chats/', views.get_user_chats, name='get_user_chats'),
+    path('get_most_like_minded/', views.get_most_like_minded, name = 'get_most_like_minded'),
     path('update_profile/', views.update_profile, name='update_profile'),
     path('<str:room_name>/', views.room, name='room'),
     path('api/', include(router.urls)),

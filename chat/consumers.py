@@ -24,8 +24,11 @@ class ChatSearchConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         # Delete room from db
         # chats = Chat.objects.filter(id=self.room_name).delete()
+        print("Deleting custom user " + self.room_name)
         user = User.objects.get(pk=int(self.room_name))
-        user.delete()
+        if (user.user == None):
+            print("Deleted")
+            user.delete()
         self.send(text_data=json.dumps({
             'message': '',
             'name': '',
@@ -95,6 +98,7 @@ class ChatSearchConsumer(WebsocketConsumer):
                 for_sure.save()
                 myself = User.objects.get(pk=user.pk)
                 myself.status="Inactive"
+                myself.save()
                 User.objects.get(pk=user.pk).status = "Inactive"
                 print ("User " + str(user.name) + " created chat " + str(chat.id))
                 self.send(text_data=json.dumps({
