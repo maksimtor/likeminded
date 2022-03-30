@@ -13,6 +13,7 @@ const Layout = () => {
             <CustomLink to="/in_search">Chat</CustomLink>
             <CustomLink to="/offline_search">Offline search</CustomLink>
             <CustomLink to="/chats">Chats</CustomLink>
+            <CustomLink to="/historical_chats">Historical chats</CustomLink>
             <CustomLink to="/profile">Profile</CustomLink>
             <Button color="#aaaaaa" backgroundColor='#DDDDDD' onClick={logoutUser}>Logout</Button>
         </header>

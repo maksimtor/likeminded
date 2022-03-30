@@ -346,9 +346,7 @@ class Profile extends Component {
     name: '',
     age: '',
     gender: genders.M,
-    languages: [],
     interests: [],
-    country: '',
     room: '',
     locToggle: false,
     geoLat: '',
@@ -368,7 +366,8 @@ class Profile extends Component {
     goals:'',
     genderPref: '',
     ageRange:[1,100],
-    ageOptimal: 25
+    ageOptimal: 25,
+    description: ''
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -407,7 +406,6 @@ class Profile extends Component {
 
   componentDidMount() {
     const {user} =this.context;
-    alert(user.user_id)
     fetch('http://localhost:8000/chat/get_user_profile/', {
       method: 'POST', // или 'PUT'
       body: JSON.stringify({'user_id': user.user_id}), // данные могут быть 'строкой' или {объектом}!
@@ -421,15 +419,6 @@ class Profile extends Component {
           for (var i in genders){
             if (genders[i].value === gender){
               gender_reformed = genders[i]
-              break;
-            }
-          }
-
-          let country = text.country;
-          var country_reformed;
-          for (var i in countries_select){
-            if (countries_select[i].value === gender){
-              country_reformed = countries_select[i]
               break;
             }
           }
@@ -461,9 +450,7 @@ class Profile extends Component {
             name: text.name,
             age: text.age,
             gender: gender_reformed,
-            languages: text.languages,
             interests: interests_reformed,
-            country: country_reformed,
             locToggle: text.locToggle,
             geoLat: text.geoLat,
             geoLon: text.geoLon,
@@ -482,7 +469,8 @@ class Profile extends Component {
             goals: goals_reformed,
             genderPref: gender_pref_reformed,
             ageRange: text.ageRange,
-            ageOptimal: text.ageOptimal
+            ageOptimal: text.ageOptimal,
+            description: text.description
         })
 
     }));
@@ -570,6 +558,21 @@ class Profile extends Component {
                   margin="normal"
                   required
                   fullWidth
+                  name="description"
+                  label="Something about you"
+                  type="description"
+                  id="description"
+                  value={this.state.description}
+                  onChange={e => {
+                    this.setState({ description: e.target.value });
+                    this.value = this.state.description;
+                  }}
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
                   name="Age"
                   label="Age"
                   type="Age"
@@ -589,27 +592,6 @@ class Profile extends Component {
                  name="gender"
                  id="gender"
                  options={genders}
-                />
-                <label for="country">Where are you from?: </label>
-                <Select
-                 value={this.state.country}
-                 onChange={(value) => {
-                  this.setState({country: value})
-                 }}
-                 name="country"
-                 id="country"
-                 options={countries_select}
-                />
-                <label for="languages">Languages: </label>
-                <Select
-                 value={this.state.languages}
-                 onChange={(value) => {
-                  this.setState({languages: value})
-                 }}
-                 name="languages"
-                 id="languages"
-                 options={languages_select}
-                 isMulti
                 />
                 <label for="inetests">Interests: </label>
                 <Select

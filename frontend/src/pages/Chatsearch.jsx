@@ -342,9 +342,7 @@ class Chatsearch extends Component {
     name: 'hey',
     age: '',
     gender: { value: 'A', label: 'Other/Anything' },
-    languages: [],
     interests: [],
-    country: '',
     room: '',
     locToggle: false,
     geoLat: 0,
@@ -447,9 +445,7 @@ class Chatsearch extends Component {
           name: this.userData.name,
           age: this.userData.age,
           gender: this.userData.gender,
-          languages: this.userData.languages,
           interests: this.userData.interests,
-          country: this.userData.country,
           locToggle: this.userData.locToggle,
           geoLat: this.userData.geoLat,
           geoLon: this.userData.geoLon,
@@ -595,27 +591,6 @@ class Chatsearch extends Component {
                  name="gender"
                  id="gender"
                  options={genders}
-                />
-                <label for="country">Where are you from?: </label>
-                <Select
-                 value={this.state.country}
-                 onChange={(value) => {
-                  this.setState({country: value})
-                 }}
-                 name="country"
-                 id="country"
-                 options={countries_select}
-                />
-                <label for="languages">Languages: </label>
-                <Select
-                 value={this.state.languages}
-                 onChange={(value) => {
-                  this.setState({languages: value})
-                 }}
-                 name="languages"
-                 id="languages"
-                 options={languages_select}
-                 isMulti
                 />
                 <label for="inetests">Interests: </label>
                 <Select

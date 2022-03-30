@@ -49,7 +49,7 @@ const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-class OfflineSearch extends Component {
+class HistoricalChats extends Component {
     static contextType = AuthContext
   state = {
     chatView: false,
@@ -76,9 +76,9 @@ class OfflineSearch extends Component {
   componentDidMount() {
 
     const {user} =this.context;
-    fetch('http://localhost:8000/chat/get_most_like_minded/', {
+    fetch('http://localhost:8000/chat/get_historical_chats/', {
       method: 'POST', // или 'PUT'
-      body: JSON.stringify({user_id: user.user_id}), // данные могут быть 'строкой' или {объектом}!
+      body: JSON.stringify({user_id: user.custom_user_id}), // данные могут быть 'строкой' или {объектом}!
       headers: {
         'Content-Type': 'application/json'
       }
@@ -91,7 +91,7 @@ class OfflineSearch extends Component {
                     onClick={e => {
                       this.createRoom({ friend_id: f_user.id});
                     }}
-                  > {f_user.id} - {f_user.like_mindness} - {f_user.name} </Button>
+                  > {f_user.id} - {f_user.name} - {f_user.timestamp} </Button>
             );
             }
             this.setState({ fieldsArray: newFieldsArray });
@@ -118,6 +118,6 @@ class OfflineSearch extends Component {
 
   }
 }
-export default withStyles(useStyles)(OfflineSearch);
+export default withStyles(useStyles)(HistoricalChats);
 
 // export {Chatsearch}

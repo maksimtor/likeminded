@@ -47,7 +47,7 @@ class Personality(models.Model):
 
 class UserInfo(models.Model):
     # filtering
-
+    description = models.CharField(max_length=1000, default="")
     country = models.CharField(max_length=200, null=True)
 
     languages = ArrayField(models.CharField(max_length=200), null=True)
@@ -117,6 +117,9 @@ class Preferences(models.Model):
     def __str__(self):
         return 'Prefs:\nage: {}, polit: {}, interests: {}, location: {}, goals: {}, gender: {}, personality: {}, loc_area: {}'.format(self.age, self.polit, self.interests, self.location, self.goals, self.gender, self.personality, self.loc_area)
 
+class HistoricalChat(models.Model):
+    chattedWith = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField('date started talking', auto_now_add=True)
 
 class CustomUser(models.Model):
     name = models.CharField(max_length=200, default='anon')
@@ -125,13 +128,17 @@ class CustomUser(models.Model):
     room_to_join = models.IntegerField(null=True)
     userInfo = models.ForeignKey(UserInfo, related_name='user_info', on_delete=models.CASCADE, null=True)
     userPrefs = models.ForeignKey(Preferences, related_name='user_prefs', on_delete=models.CASCADE, null=True)
+    sentFriendRequests = models.ManyToManyField('CustomUser', related_name='receivedFriendRequests')
+    ignoredUsers = models.ManyToManyField('CustomUser', related_name='usersIgnoredBy')
+    friends = models.ManyToManyField('CustomUser')
+    historicalChats = models.ManyToManyField('HistoricalChat')
 
     def __str__(self):
         return 'Name: {}\n{}\n{}'.format(self.user, self.userInfo, self.userPrefs)
 
 class Message(models.Model):
     message = models.CharField(max_length=200)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)        # change to custom user
     timestamp = models.DateTimeField('date sent', auto_now_add=True)
 
 class ChatRoom(models.Model):

@@ -5,7 +5,7 @@ from django.http import Http404
 from django.template import loader
 from django.urls import reverse
 from django.db.models import Q
-from .models import CustomUser, Chat, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences, SearchingInstance, ChatRoom
+from .models import HistoricalChat, CustomUser, Chat, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences, SearchingInstance, ChatRoom
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
 from .serializers import UserSerializer, ChatSerializer
 from rest_framework import viewsets
@@ -31,6 +31,36 @@ class ChatView(viewsets.ModelViewSet):
     queryset = Chat.objects.all()
 
 @csrf_exempt
+def create_historical_chat(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data['user1'])
+    user1_id = int(data['user1'])
+    print(data['user2'])
+    user2_id = int(data['user2'])
+
+    chat = HistoricalChat.objects.create(chattedWith=CustomUser.objects.get(id=user2_id))
+    chat.save()
+    me = CustomUser.objects.get(id=user1_id)
+    me.historicalChats.add(chat)
+    me.save()
+    return JsonResponse({'chat_ids': ''})
+
+@csrf_exempt
+def get_historical_chats(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data['user_id'])
+    user_id = data['user_id']
+    reformed_chats = []
+    chats = CustomUser.objects.get(id=int(user_id)).historicalChats.all()
+    print(CustomUser.objects.get(id=int(user_id)).user.username)
+    for c in chats:
+        reformed_chats.append({'id': c.chattedWith.id, 'name':c.chattedWith.name, 'timestamp': c.timestamp})
+    print(reformed_chats)
+    return JsonResponse({'result': reformed_chats})
+
+@csrf_exempt
 def get_most_like_minded(request):
     body_unicode = request.body.decode('utf-8')
     data = json.loads(body_unicode)
@@ -40,15 +70,15 @@ def get_most_like_minded(request):
     userProfile = user.profile
 
     users = User.objects.all()
-    accepted_users = [{'id': 0, 'like_mindness': 0}]
+    accepted_users = []
     for u in users:
         potential_profile = u.profile
-        if (calcAcceptance(mainUser=userProfile, targetUser=potential_profile) == 1 and calcAcceptance(mainUser=potential_profile, targetUser=userProfile) == 1):
+        if (calcAcceptance(mainUser=userProfile, targetUser=potential_profile) == 1 and calcAcceptance(mainUser=potential_profile, targetUser=userProfile) == 1 and potential_profile!=userProfile and potential_profile not in userProfile.sentFriendRequests.all() and potential_profile not in userProfile.ignoredUsers.all() and potential_profile not in userProfile.usersIgnoredBy.all() and potential_profile not in userProfile.friends.all()):
             l1 = calcLikeness(mainUser=userProfile, targetUser=potential_profile)
             l2 = calcLikeness(mainUser=potential_profile, targetUser=userProfile)
             result = (l1+l2)/2
-            accepted_users.append({'id': u.profile.id, 'like_mindness': result})
-    result_users = sorted(accepted_users, key=lambda d: d['like_mindness'], reverse=True)[0:2]
+            accepted_users.append({'id': u.profile.id, 'like_mindness': result, 'name': u.username})
+    result_users = sorted(accepted_users, key=lambda d: d['like_mindness'], reverse=True)[0:10]
     print(result_users)
     return JsonResponse({'result': result_users})
 
@@ -122,9 +152,7 @@ def get_user_profile(request):
         'name': user.username,
         'age': custom_user.userInfo.age,
         'gender': custom_user.userInfo.gender,
-        'languages': custom_user.userInfo.languages,
         'interests': custom_user.userInfo.interests,
-        'country': custom_user.userInfo.country,
         'locToggle': custom_user.userInfo.location != None,
         'geoLat': custom_user.userInfo.location.lat,
         'geoLon': custom_user.userInfo.location.lon,
@@ -143,7 +171,8 @@ def get_user_profile(request):
         'goals': custom_user.userPrefs.goals,
         'genderPref': custom_user.userPrefs.gender,
         'ageRange': [custom_user.userPrefs.age.min_age, custom_user.userPrefs.age.max_age],
-        'ageOptimal': custom_user.userPrefs.age.optimal_age
+        'ageOptimal': custom_user.userPrefs.age.optimal_age,
+        'description': custom_user.userInfo.description
     }
     print(user_data)
     return JsonResponse(user_data)
@@ -175,6 +204,31 @@ def create_chat_room(request):
     return JsonResponse({'chat_ids': ''})
 
 @csrf_exempt
+def send_friend_request(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data['user1'])
+    user1_id = int(data['user1'])
+    print(data['user2'])
+    user2_id = int(data['user2'])
+    custom_user_1 = CustomUser.objects.get(id=user1_id)
+    custom_user_2 = CustomUser.objects.get(id=user2_id)
+    if custom_user_2 in custom_user_1.receivedFriendRequests.all():
+        chat_room = ChatRoom.objects.create()
+        chat_room.participants.add(CustomUser.objects.get(id=user1_id))
+        chat_room.participants.add(CustomUser.objects.get(id=user2_id))
+        custom_user_1.friends.add(custom_user_2)
+        custom_user_2.friends.add(custom_user_1)
+        custom_user_1.save()
+        custom_user_2.save()
+        return JsonResponse({'result': 'Match!'})
+    else:
+        custom_user_1.sentFriendRequests.add(custom_user_2)
+        custom_user_1.save()
+        custom_user_2.save()
+        return JsonResponse({'result': 'Request sent!'})
+
+@csrf_exempt
 def create_user(request):
     body_unicode = request.body.decode('utf-8')
     data = json.loads(body_unicode)
@@ -182,17 +236,12 @@ def create_user(request):
     userName = data['name']
     userAge = data['age']
     userGender = data['gender']['value']
-    userCountry = None
     if (userGender == 'M'):
         userGender = Gender.MALE
     elif (userGender == 'F'):
         userGender = Gender.FEMALE
     else:
         userGender = Gender.ANYTHING
-    userLanguages = data['languages']
-    userLanguagesReformed = []
-    for l in userLanguages:
-        userLanguagesReformed.append(l['value'])
     userInterests = data['interests']
     userInterestsReformed = []
     for i in userInterests:
@@ -250,8 +299,6 @@ def create_user(request):
         geo = GeoCoordinates.objects.create(lat=userGeoLat, lon=userGeoLon)
         geo.save()
     user_info = UserInfo.objects.create(
-        country=userCountry,
-        languages=userLanguagesReformed,
         interests=userInterestsReformed,
         polit_coordinates=pol,
         location=geo,
@@ -284,20 +331,15 @@ def update_profile(request):
     # Getting CustomUser data
     userId = data['user_id']
     userName = data['name']
+    userDescription = data['description']
     userAge = data['age']
     userGender = data['gender']['value']
-    userCountry = None
     if (userGender == 'M'):
         userGender = Gender.MALE
     elif (userGender == 'F'):
         userGender = Gender.FEMALE
     else:
         userGender = Gender.ANYTHING
-    userLanguages = data['languages']
-    userLanguagesReformed = []
-    if (userLanguages):
-        for l in userLanguages:
-            userLanguagesReformed.append(l['value'])
     userInterestsReformed = []
     if 'interests' in data.keys():
         userInterests = data['interests']
@@ -344,9 +386,8 @@ def update_profile(request):
     profile = user.profile
 
     info = profile.userInfo
-    info.country=userCountry
-    info.languages=userLanguagesReformed
     info.interests=userInterestsReformed
+    info.description=userDescription
     pol = info.polit_coordinates
     pol.eco=userPolEco
     pol.cult=userPolGov

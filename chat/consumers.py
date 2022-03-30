@@ -70,7 +70,7 @@ class ChatSearchConsumer(WebsocketConsumer):
             best_user = None
             best_score = 0
             for target_user in searching_users:
-                if (calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1 and user.id != target_user.id):
+                if (calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1 and user.id != target_user.id and target_user not in user.friends.all() and target_user not in user.ignoredUsers.all() and target_user not in user.usersIgnoredBy.all()):
                     l1 = calcLikeness(mainUser=user, targetUser=target_user)
                     l2 = calcLikeness(mainUser=target_user, targetUser=user)
                     result = (l1+l2)/2
@@ -294,17 +294,6 @@ class FriendChatConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         # Delete room from db
         chats = Chat.objects.filter(id=self.room_name).delete()
-        self.send(text_data=json.dumps({
-            'message': '',
-            'name': '',
-            'type': 'exit'
-        }))
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'exit_message'
-            }
-        )
         # Leave room group
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
@@ -321,16 +310,22 @@ class FriendChatConsumer(WebsocketConsumer):
 
         if (m_type == 'open_chat'):
             chat_room = ChatRoom.objects.get(id=self.room_name)
-            messages = chat_room.messages.order_by('-timestamp').all()[:10]
+            messages = chat_room.messages.order_by('timestamp').all()[:10]
             for message in messages:
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,
                     {
-                        'type': 'chat_message',
+                        'type': 'restore_chat',
                         'message': message.message,
                         'name': message.user.username
                     }
                 )
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'chat_restored'
+                }
+        )
         else:
             # save message
             chat_room = ChatRoom.objects.get(id=self.room_name)
@@ -357,9 +352,24 @@ class FriendChatConsumer(WebsocketConsumer):
             'message': message,
             'name': name
         }))
+    def restore_chat(self, event):
+        message = event['message']
+        name = event['name']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'restore_chat',
+            'message': message,
+            'name': name
+        }))
 
     def exit_message(self, event):
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'type': 'exit_message'
+        }))
+    def chat_restored(self, event):
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'chat_restored'
         }))

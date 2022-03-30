@@ -454,6 +454,16 @@ class InChatSearch extends Component {
                   else if (dataFromServer.type === 'possible_unblind'){
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
                       this.setState({ canUnblind: true })
+                        fetch('http://localhost:8000/chat/create_historical_chat/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({user1: user.custom_user_id, user2: dataFromServer.message}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                alert("chat created")
+                            }));
                     }
                   }
                   else if (dataFromServer.type === 'unblind_request'){

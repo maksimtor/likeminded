@@ -57,6 +57,7 @@ class Chatsearch extends Component {
     room: null,
     fieldsArray: ['hey'],
     value:'',
+    chatRestored: false,
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -89,10 +90,25 @@ class Chatsearch extends Component {
                 const dataFromServer = JSON.parse(message.data);
                 console.log('got reply! ', dataFromServer.type);
                 if (dataFromServer) {
-                  if (dataFromServer.type === 'exit_message') {
-                    this.setState({ isLoggedIn: false });
+                   if (dataFromServer.type === 'chat_restored') {
+                    this.setState({ chatRestored: true });
 
-                  } else {
+                  } 
+                  else if (dataFromServer.type === 'restore_chat' && this.state.chatRestored === false) {
+                    this.setState((state) =>
+                      ({
+                        messages: [...state.messages,
+                        {
+                          msg: dataFromServer.message,
+                          name: dataFromServer.name
+                        }]
+                      })
+                    );
+                  }
+                  else if (dataFromServer.type === 'restore_chat' && this.state.chatRestored === true) {
+                    
+                  }
+                  else {
                     this.setState((state) =>
                       ({
                         messages: [...state.messages,

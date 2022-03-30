@@ -10,6 +10,7 @@ import Regpage from './pages/Regpage';
 import InChatSearch from './pages/InChatSearch';
 import OfflineSearch from './pages/OfflineSearch';
 import Chats from './pages/Chats';
+import HistoricalChats from './pages/HistoricalChats';
 import Profile from './pages/Profile';
 
 import { AuthProvider } from './context/AuthContext'
@@ -30,6 +31,7 @@ function App() {
               <Route path='in_search' element={<RequireAuth><InChatSearch /></RequireAuth>} />
               <Route path='offline_search' element={<RequireAuth><OfflineSearch /></RequireAuth>} />
               <Route path='chats' element={<RequireAuth><Chats /></RequireAuth>} />
+              <Route path='historical_chats' element={<RequireAuth><HistoricalChats /></RequireAuth>} />
               <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path='login' element={
                 <RequireAnon>
