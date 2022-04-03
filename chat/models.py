@@ -102,7 +102,9 @@ class Preferences(models.Model):
 
     personality = models.BooleanField(max_length=200, default=False)
 
-    loc_area = ArrayField(models.CharField(max_length=200), null=True)
+    area_restrict = models.BooleanField(max_length=200, default=False)
+
+    loc_area = models.IntegerField(null=True, default=10)
 
     goals = models.CharField(max_length=2,
         choices=ChatGoal.choices,

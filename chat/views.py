@@ -167,6 +167,7 @@ def get_user_profile(request):
         'intPref': custom_user.userPrefs.interests,
         'locPref': custom_user.userPrefs.location,
         'areaPref': custom_user.userPrefs.loc_area,
+        'areaRestrictToggle': custom_user.userPrefs.area_restrict,
         'persPref': custom_user.userPrefs.personality,
         'goals': custom_user.userPrefs.goals,
         'genderPref': custom_user.userPrefs.gender,
@@ -254,6 +255,9 @@ def create_user(request):
     userName = data['name']
     userAge = data['age']
     userGender = data['gender']['value']
+    userAreaRestrictToggle=data['areaRestrictToggle']
+    userLocPref=data['locPref']
+    userAreaPref=data['areaPref']
     if (userGender == 'M'):
         userGender = Gender.MALE
     elif (userGender == 'F'):
@@ -276,7 +280,6 @@ def create_user(request):
     userPersonalityNeuroticism = data['personalityNeuroticism']/10
     userPolitPref = data['politPref']
     userIntPref = data['intPref']
-    userLocPref = data['locPref']
     # userAreaPref = data['areaPref']
     userAreaPrefReformed = []
     # for i in userAreaPref:
@@ -333,7 +336,8 @@ def create_user(request):
         location=userLocPref,
         gender=userGenderPref,
         personality=userPersPref,
-        loc_area=None
+        area_restrict=userAreaRestrictToggle,
+        loc_area=userAreaPref,
         )
     user_pref.save()
     custom_user = CustomUser.objects.create(name=userName, userInfo=user_info, userPrefs=user_pref)
@@ -351,6 +355,11 @@ def update_profile(request):
     userName = data['name']
     userDescription = data['description']
     userAge = data['age']
+    userAreaRestrictToggle=data['areaRestrictToggle']
+    userLocPref=data['locPref']
+    userAreaPref=data['areaPref']
+    print('area pref')
+    print(userAreaPref)
     userGender = data['gender']['value']
     if (userGender == 'M'):
         userGender = Gender.MALE
@@ -377,6 +386,7 @@ def update_profile(request):
     userPolitPref = data['politPref']
     userIntPref = data['intPref']
     userLocPref = data['locPref']
+    userAreaPref = data['areaPref']
     # userAreaPref = data['areaPref']
     userAreaPrefReformed = []
     # for i in userAreaPref:
@@ -438,7 +448,8 @@ def update_profile(request):
     prefs.location=userLocPref
     prefs.gender=userGenderPref
     prefs.personality=userPersPref
-    prefs.loc_area=None
+    prefs.area_restrict=userAreaRestrictToggle
+    prefs.loc_area=userAreaPref
     age_pref = prefs.age
     age_pref.min_age=userAgeRange[0]
     age_pref.max_age=userAgeRange[1]

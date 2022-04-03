@@ -361,7 +361,8 @@ class Profile extends Component {
     politPref: false,
     intPref: false,
     locPref: false,
-    areaPref: [],
+    areaRestrictToggle: false,
+    areaPref: 10,
     persPref: false,
     goals:'',
     genderPref: '',
@@ -464,6 +465,7 @@ class Profile extends Component {
             politPref: text.politPref,
             intPref: text.intPref,
             locPref: text.locPref,
+            areaRestrictToggle: text.areaRestrictToggle,
             areaPref: text.areaPref,
             persPref: text.persPref,
             goals: goals_reformed,
@@ -710,17 +712,29 @@ class Profile extends Component {
                   onToggle={(value) => {
                     this.setState({locPref: !value,});
                   }} />
-                <label for="areaPref">Preferred area: </label>
-                <Select
-                 value={this.state.areaPref}
-                 onChange={(value) => {
-                  this.setState({areaPref: value})
-                 }}
-                 name="areapref"
-                 id="areapref"
-                 options={areas_select}
-                 isMulti
-                />
+                <p> Do you want to restrict location area? </p>
+                <ToggleButton
+                  value={ this.state.areaRestrictToggle || false }
+                  onToggle={(value) => {
+                    this.setState({areaRestrictToggle: !value,});
+                  }} />
+                {this.state.areaRestrictToggle ?
+                <div>
+                <label for="areaPref">Restrict area: </label>
+                <Slider
+                  valueLabelDisplay="on"
+                  value={this.state.areaPref}
+                  step={1}
+                  min={0}
+                  max={100}
+                  onChange={(event: any, newValue: any) => {
+                    this.setState({areaPref: newValue})
+                  }} 
+                  />
+                </div>
+                :
+                <div></div>
+                }
                 <p> Do you want to find a person with similar interests? </p> {this.state.intPref}
                 <ToggleButton
                   value={ this.state.intPref || false }
