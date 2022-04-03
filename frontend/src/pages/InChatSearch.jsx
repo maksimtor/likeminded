@@ -386,6 +386,19 @@ class InChatSearch extends Component {
     this.state.value = ''
     e.preventDefault();
   }
+  ignoreUser = async(e) => {
+    const {user} =this.context;
+                        fetch('http://localhost:8000/chat/ignore_user/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({user1: user.custom_user_id, user2: e.friend_id}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                alert(text.result);
+                            }));
+  }
 
   sendUnblindRequest = (e) => {
     const {user} =this.context;
@@ -454,6 +467,7 @@ class InChatSearch extends Component {
                   else if (dataFromServer.type === 'possible_unblind'){
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
                       this.setState({ canUnblind: true })
+                      this.setState({ talkingWith: dataFromServer.message})
                         fetch('http://localhost:8000/chat/create_historical_chat/', {
                           method: 'POST', // или 'PUT'
                           body: JSON.stringify({user1: user.custom_user_id, user2: dataFromServer.message}), // данные могут быть 'строкой' или {объектом}!
@@ -610,6 +624,7 @@ class InChatSearch extends Component {
                 Start Chatting
                 </Button>
               {this.state.canUnblind ?
+                <div>
               <Button
                   onClick={this.sendUnblindRequest}
                   type="button"
@@ -620,6 +635,13 @@ class InChatSearch extends Component {
                 >
                   Unblind
                   </Button>
+                  <Button
+                    onClick={e => {
+                      this.ignoreUser({ friend_id: this.state.talkingWith});
+                    }}
+                  >  Ignore
+                  </Button>
+                  </div>
                 :
                 <div></div>
                 }

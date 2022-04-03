@@ -73,6 +73,20 @@ class OfflineSearch extends Component {
                             }));
   }
 
+  ignoreUser = async(e) => {
+    const {user} =this.context;
+                        fetch('http://localhost:8000/chat/ignore_user/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({user1: user.custom_user_id, user2: e.friend_id}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                alert(text.result);
+                            }));
+  }
+
   componentDidMount() {
 
     const {user} =this.context;
@@ -87,11 +101,19 @@ class OfflineSearch extends Component {
             let newFieldsArray = [];
             for (const f_user of text.result){
                 newFieldsArray.push(
+                  <div>
                   <Button
                     onClick={e => {
                       this.createRoom({ friend_id: f_user.id});
                     }}
                   > {f_user.id} - {f_user.like_mindness} - {f_user.name} </Button>
+                  <Button
+                    onClick={e => {
+                      this.ignoreUser({ friend_id: f_user.id});
+                    }}
+                  >  Ignore
+                  </Button>
+                  </div>
             );
             }
             this.setState({ fieldsArray: newFieldsArray });

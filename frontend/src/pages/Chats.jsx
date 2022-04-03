@@ -58,6 +58,7 @@ class Chatsearch extends Component {
     fieldsArray: ['hey'],
     value:'',
     chatRestored: false,
+    talkingWith: 0,
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -71,6 +72,20 @@ class Chatsearch extends Component {
     }));
     this.state.value = ''
     e.preventDefault();
+  }
+
+  ignoreUser = async(e) => {
+    const {user} =this.context;
+                        fetch('http://localhost:8000/chat/ignore_user/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({user1: user.custom_user_id, user2: e.friend_id}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                alert(text.result);
+                            }));
   }
 
   enterRoom = async(e) => {
@@ -136,14 +151,15 @@ class Chatsearch extends Component {
     })
         .then(response => response.json().then((text) => {
             let newFieldsArray = [];
-            for (const chat_id of text.chat_ids){
+            for (const chat of text.chat_ids){
                 newFieldsArray.push(
                   <Button
                     onClick={e => {
                       this.setState({ chatView: true });
-                      this.enterRoom({ room: chat_id});
+                      this.enterRoom({ room: chat.chat_id});
+                      this.setState({ talkingWith: chat.user_id})
                     }}
-                  > {chat_id} </Button>
+                  > {chat.chat_id} - {chat.user_id} </Button>
             );
             }
             this.setState({ fieldsArray: newFieldsArray });
@@ -200,6 +216,12 @@ class Chatsearch extends Component {
               >
                 Start Chatting
                 </Button>
+                                  <Button
+                    onClick={e => {
+                      this.ignoreUser({ friend_id: this.state.talkingWith});
+                    }}
+                  >  Ignore
+                  </Button>
             </form>
           </div>
 

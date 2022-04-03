@@ -184,9 +184,13 @@ def get_user_chats(request):
     print(data['user_id'])
     user_id = data['user_id']
     chat_ids = []
+    cu = CustomUser.objects.get(id=int(user_id))
     chats = CustomUser.objects.get(id=int(user_id)).chats.all()
     for c in chats:
-        chat_ids.append(c.id)
+        print(c.participants.exclude(id=user_id)[0].id)
+        friend = c.participants.exclude(id=user_id)[0]
+        if friend not in cu.ignoredUsers.all() and cu not in friend.ignoredUsers.all():
+            chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id})
     print(chat_ids)
     return JsonResponse({'chat_ids': chat_ids})
 
@@ -227,6 +231,20 @@ def send_friend_request(request):
         custom_user_1.save()
         custom_user_2.save()
         return JsonResponse({'result': 'Request sent!'})
+
+@csrf_exempt
+def ignore_user(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    print(data['user1'])
+    user1_id = int(data['user1'])
+    print(data['user2'])
+    user2_id = int(data['user2'])
+    custom_user_1 = CustomUser.objects.get(id=user1_id)
+    custom_user_2 = CustomUser.objects.get(id=user2_id)
+    custom_user_1.ignoredUsers.add(custom_user_2)
+    custom_user_1.save()
+    return JsonResponse({'result': 'Ignored!'})
 
 @csrf_exempt
 def create_user(request):
