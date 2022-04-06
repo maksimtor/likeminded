@@ -191,7 +191,7 @@ def get_user_chats(request):
         print(c.participants.exclude(id=user_id)[0].id)
         friend = c.participants.exclude(id=user_id)[0]
         if friend not in cu.ignoredUsers.all() and cu not in friend.ignoredUsers.all():
-            chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id})
+            chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': c.messages.order_by('-timestamp').all()[0].message, 'read_last_message': c.messages.order_by('-timestamp').all()[0].read})
     print(chat_ids)
     return JsonResponse({'chat_ids': chat_ids})
 
@@ -246,6 +246,19 @@ def ignore_user(request):
     custom_user_1.ignoredUsers.add(custom_user_2)
     custom_user_1.save()
     return JsonResponse({'result': 'Ignored!'})
+
+@csrf_exempt
+def read_messages(request):
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    chat_id = int(data['chat_id'])
+    friend_id = int(data['friend_id'])
+    messages = ChatRoom.objects.get(id=chat_id).messages.filter(user=CustomUser.objects.get(id=friend_id).user)
+    for m in messages:
+        m.read = True
+        m.save()
+    print(messages)
+    return JsonResponse({'result': 'Read!'})
 
 @csrf_exempt
 def create_user(request):

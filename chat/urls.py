@@ -26,6 +26,7 @@ urlpatterns = [
     path('get_most_like_minded/', views.get_most_like_minded, name = 'get_most_like_minded'),
     path('send_friend_request/', views.send_friend_request, name = 'send_friend_request'),
     path('ignore_user/', views.ignore_user, name = 'ignore_user'),
+    path('read_messages/', views.read_messages, name = 'read_messages'),
     path('update_profile/', views.update_profile, name='update_profile'),
     path('<str:room_name>/', views.room, name='room'),
     path('api/', include(router.urls)),

@@ -142,6 +142,7 @@ class Message(models.Model):
     message = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.CASCADE)        # change to custom user
     timestamp = models.DateTimeField('date sent', auto_now_add=True)
+    read = models.BooleanField(default=False)
 
 class ChatRoom(models.Model):
     participants = models.ManyToManyField(CustomUser, related_name='chats', blank=True)

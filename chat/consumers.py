@@ -317,7 +317,9 @@ class FriendChatConsumer(WebsocketConsumer):
                     {
                         'type': 'restore_chat',
                         'message': message.message,
-                        'name': message.user.username
+                        'name': message.user.username,
+                        'read': message.read,
+                        'idd': message.user.profile.id,
                     }
                 )
             async_to_sync(self.channel_layer.group_send)(
@@ -326,6 +328,15 @@ class FriendChatConsumer(WebsocketConsumer):
                     'type': 'chat_restored'
                 }
         )
+        elif (m_type == 'messages_read'):
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'messages_read',
+                    'message': message,
+                    'name': name
+                }
+            )
         else:
             # save message
             chat_room = ChatRoom.objects.get(id=self.room_name)
@@ -355,14 +366,28 @@ class FriendChatConsumer(WebsocketConsumer):
     def restore_chat(self, event):
         message = event['message']
         name = event['name']
+        read = event['read']
+        idd = event['idd']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'type': 'restore_chat',
             'message': message,
-            'name': name
+            'name': name,
+            'read': read,
+            'id': idd,
         }))
 
+    def messages_read(self, event):
+        message = event['message']
+        name = event['name']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'messages_read',
+            'message': message,
+            'name': name
+        }))
     def exit_message(self, event):
         # Send message to WebSocket
         self.send(text_data=json.dumps({

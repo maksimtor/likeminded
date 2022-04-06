@@ -59,6 +59,7 @@ class Chatsearch extends Component {
     value:'',
     chatRestored: false,
     talkingWith: 0,
+    interval: 0,
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -72,6 +73,34 @@ class Chatsearch extends Component {
     }));
     this.state.value = ''
     e.preventDefault();
+  }
+
+  readMessages = (e) => {
+    const {user} =this.context;
+    let readMessages = this.state.messages;
+    // alert(this.state.messages)
+    for (var m in readMessages){
+      if (readMessages[m].id === this.state.talkingWith) {
+        readMessages[m].read = true;
+      }
+    this.client.send(JSON.stringify({
+      type: "messages_read",
+      message: user.custom_user_id,
+      name: 'name'
+    }));
+    }
+    this.setState({messages: readMessages})
+    fetch('http://localhost:8000/chat/read_messages/', {
+                          method: 'POST', // или 'PUT'
+                          body: JSON.stringify({chat_id: this.state.room, friend_id: this.state.talkingWith}), // данные могут быть 'строкой' или {объектом}!
+                          headers: {
+                            'Content-Type': 'application/json'
+                          }
+                        })
+                            .then(response => response.json().then((text) => {
+                                // alert(text.result);
+                            }));
+    // e.preventDefault();
   }
 
   ignoreUser = async(e) => {
@@ -89,6 +118,7 @@ class Chatsearch extends Component {
   }
 
   enterRoom = async(e) => {
+    const {user} =this.context;
     this.setState({ room: e.room})
     this.setState({ chatView: true})
     this.state.chatView = true;
@@ -107,7 +137,7 @@ class Chatsearch extends Component {
                 if (dataFromServer) {
                    if (dataFromServer.type === 'chat_restored') {
                     this.setState({ chatRestored: true });
-
+                    setTimeout(() => this.readMessages(), 500);
                   } 
                   else if (dataFromServer.type === 'restore_chat' && this.state.chatRestored === false) {
                     this.setState((state) =>
@@ -115,7 +145,9 @@ class Chatsearch extends Component {
                         messages: [...state.messages,
                         {
                           msg: dataFromServer.message,
-                          name: dataFromServer.name
+                          name: dataFromServer.name,
+                          id: dataFromServer.id,
+                          read: dataFromServer.read,
                         }]
                       })
                     );
@@ -123,13 +155,27 @@ class Chatsearch extends Component {
                   else if (dataFromServer.type === 'restore_chat' && this.state.chatRestored === true) {
                     
                   }
+                  else if (dataFromServer.type === 'messages_read'){
+                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
+                          let readMessages = this.state.messages;
+                          // alert(this.state.messages)
+                          for (var m in readMessages){
+                            if (readMessages[m].id !== this.state.talkingWith) {
+                              readMessages[m].read = true;
+                            }
+                          }
+                          this.setState({messages: readMessages})
+                    }
+                  }
                   else {
+                    this.readMessages();
                     this.setState((state) =>
                       ({
                         messages: [...state.messages,
                         {
                           msg: dataFromServer.message,
-                          name: dataFromServer.name
+                          name: dataFromServer.name,
+                          id: 'poh'
                         }]
                       })
                     );
@@ -140,7 +186,6 @@ class Chatsearch extends Component {
   }
 
   componentDidMount() {
-
     const {user} =this.context;
     fetch('http://localhost:8000/chat/get_user_chats/', {
       method: 'POST', // или 'PUT'
@@ -159,16 +204,46 @@ class Chatsearch extends Component {
                       this.enterRoom({ room: chat.chat_id});
                       this.setState({ talkingWith: chat.user_id})
                     }}
-                  > {chat.chat_id} - {chat.user_id} </Button>
+                  > {chat.chat_id} - {chat.user_id} - {chat.last_message} - {chat.read_last_message ? 'read' : 'not read'}</Button>
             );
             }
             this.setState({ fieldsArray: newFieldsArray });
         }));
     }
-  
-  componentWillUpdate(nextProps, nextState) {
-    localStorage.setItem('user', JSON.stringify(nextState));
+
+  componentWillUpdate() {
+    const {user} =this.context;
+    setTimeout(() => {
+    fetch('http://localhost:8000/chat/get_user_chats/', {
+      method: 'POST', // или 'PUT'
+      body: JSON.stringify({user_id: user.custom_user_id}), // данные могут быть 'строкой' или {объектом}!
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+        .then(response => response.json().then((text) => {
+            let newFieldsArray = [];
+            for (const chat of text.chat_ids){
+                newFieldsArray.push(
+                  <Button
+                    onClick={e => {
+                      this.setState({ chatView: true });
+                      this.enterRoom({ room: chat.chat_id});
+                      this.setState({ talkingWith: chat.user_id})
+                    }}
+                  > {chat.chat_id} - {chat.user_id} - {chat.last_message} - {chat.read_last_message ? 'read' : 'not read'}</Button>
+            );
+            }
+            this.setState({ fieldsArray: newFieldsArray });
+        }));
+    }, 2000);
+
+
   }
+  
+  // componentWillUpdate(nextProps, nextState) {
+  //   alert("when")
+  // }
 
   render() {
     // window.navigator.geolocation.getCurrentPosition(this.success, this.success);
@@ -184,7 +259,7 @@ class Chatsearch extends Component {
                   <CardHeader
                     avatar={
                       <Avatar className={classes.avatar}>
-                        R
+                       {message.read ? 'r' : 'n'}
                       </Avatar>
                     }
                     title={message.name}
