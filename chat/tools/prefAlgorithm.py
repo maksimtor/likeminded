@@ -17,6 +17,9 @@ def calcAcceptance(mainUser, targetUser):
 	mainAgePrefs = mainUser.userPrefs.age
 	mainGenderPrefs = mainUser.userPrefs.gender
 	mainAreaPrefs = mainUser.userPrefs.loc_area
+	mainAreaRestrictionOn = mainUser.userPrefs.area_restrict
+	mainAreaRestrictionValue = mainUser.userPrefs.loc_area
+	mainLocation = mainUser.userInfo.location
 
 	# collecting target user info and strict prefs
 	targetGoals = targetUser.userPrefs.goals
@@ -27,6 +30,35 @@ def calcAcceptance(mainUser, targetUser):
 	targetAgePrefs = targetUser.userPrefs.age
 	targetGenderPrefs = targetUser.userPrefs.gender
 	targetAreaPrefs = targetUser.userPrefs.loc_area
+	targetAreaRestrictionOn = targetUser.userPrefs.area_restrict
+	targetAreaRestrictionValue = targetUser.userPrefs.loc_area
+	targetLocation = targetUser.userInfo.location
+
+	# area checking
+
+	if mainAreaRestrictionOn or targetAreaRestrictionOn:
+		if mainLocation and targetLocation:
+			R = 6373.0
+
+			lat1 = radians(mainLocation.lat)
+			lon1 = radians(mainLocation.lon)
+			lat2 = radians(targetLocation.lat)
+			lon2 = radians(targetLocation.lon)
+
+			dlon = lon2 - lon1
+			dlat = lat2 - lat1
+
+			a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+			c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+			distance = R * c
+			if distance > mainAreaRestrictionValue or distance > targetAreaRestrictionValue:
+				return 'Distance is too big for at least one of the parties'
+			else:
+				pass
+		else:
+			return 'Locations are not available, though needed for restriction check'
+
 	# goal checking
 	if (mainGoals == ChatGoal.ANYTHING) or (targetGoals == ChatGoal.ANYTHING):
 		pass

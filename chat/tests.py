@@ -65,7 +65,11 @@ def create_random_user():
     if (randrange(0,4) != 1):
         locat = True
 
-    loc_area = ['RU']
+    area_restrict = False
+    if (randrange(0,4) != 1):
+        area_restrict = True
+
+    loc_area = randrange(0,20000)
 
     personality_bool = False
     if (randrange(0,4) != 1):
@@ -104,6 +108,7 @@ def create_random_user():
         location=locat,
         gender=pref_gender,
         personality=personality_bool,
+        area_restrict=area_restrict,
         loc_area=loc_area
         )
     user_pref.save()
