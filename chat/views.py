@@ -148,6 +148,9 @@ def get_user_profile(request):
     user = User.objects.get(id=int(user_id))
     custom_user = user.profile
     print(custom_user)
+    photo = 'None'
+    if (custom_user.userInfo.photo):
+        photo = custom_user.userInfo.photo.url
     user_data = {
         'name': user.username,
         'age': custom_user.userInfo.age,
@@ -173,7 +176,8 @@ def get_user_profile(request):
         'genderPref': custom_user.userPrefs.gender,
         'ageRange': [custom_user.userPrefs.age.min_age, custom_user.userPrefs.age.max_age],
         'ageOptimal': custom_user.userPrefs.age.optimal_age,
-        'description': custom_user.userInfo.description
+        'description': custom_user.userInfo.description,
+        'photo': photo,
     }
     print(user_data)
     return JsonResponse(user_data)
@@ -358,12 +362,24 @@ def create_user(request):
     print("Created CustomUser " + str(custom_user.pk))
     return JsonResponse({'user_id':custom_user.pk})
 
+@csrf_exempt
+def upload_profile_photo(request):
+    user_id = request.POST['user_id']
+    photo = request.FILES['image']
+    user = CustomUser.objects.get(id=user_id)
+    user.userInfo.photo.save(str(photo), photo)
+    print(photo)
+    return JsonResponse({'e':'e'})
+
 
 @csrf_exempt
 def update_profile(request):
     body_unicode = request.body.decode('utf-8')
     data = json.loads(body_unicode)
     # Getting CustomUser data
+    image = data['image']
+    print('image')
+    print(image)
     userId = data['user_id']
     userName = data['name']
     userDescription = data['description']

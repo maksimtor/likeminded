@@ -28,6 +28,7 @@ urlpatterns = [
     path('ignore_user/', views.ignore_user, name = 'ignore_user'),
     path('read_messages/', views.read_messages, name = 'read_messages'),
     path('update_profile/', views.update_profile, name='update_profile'),
+    path('upload_profile_photo/', views.upload_profile_photo, name='upload_profile_photo'),
     path('<str:room_name>/', views.room, name='room'),
     path('api/', include(router.urls)),
 ]

@@ -22,6 +22,8 @@ import { withStyles } from "@material-ui/core/styles";
 
 import AuthContext from '../context/AuthContext'
 
+import TinderCard from 'react-tinder-card'
+
 const useStyles = theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -56,7 +58,10 @@ class OfflineSearch extends Component {
     messages: [],
     room: null,
     fieldsArray: ['hey'],
+    tinderCards: ['hey'],
     value:'',
+    matchList:[],
+    currentIndex: null,
   }
 
   createRoom = async(e) => {
@@ -87,6 +92,21 @@ class OfflineSearch extends Component {
                             }));
   }
 
+  swiped = (direction, id) => {
+    this.setState({currentIndex: this.state.currentIndex-1})
+    alert(direction==='right')
+    if (direction==='right'){
+      this.createRoom({ friend_id: id});
+    }
+    else {
+      this.ignoreUser({ friend_id: id});
+    }
+  }
+
+  outOfFrame = (name) => {
+    console.log(name + ' left the screen!')
+  }
+
   componentDidMount() {
 
     const {user} =this.context;
@@ -99,7 +119,19 @@ class OfflineSearch extends Component {
     })
         .then(response => response.json().then((text) => {
             let newFieldsArray = [];
+            let newTinderCards = [];
+            let newMatchList = [];
             for (const f_user of text.result){
+                newMatchList.push({like_mindness: f_user.name})
+                newTinderCards.push(
+                <div>
+                  <TinderCard className='swipe' key={f_user.name} onSwipe={(dir) => this.swiped(dir, f_user.id)} onCardLeftScreen={() => this.outOfFrame(f_user.name)}>
+                    <div style={{ backgroundImage: 'url(media/photos/tree.jpg)' }} className='card'>
+                      <h3>{f_user.name}</h3>
+                    </div>
+                  </TinderCard>
+                </div>
+                );
                 newFieldsArray.push(
                   <div>
                   <Button
@@ -117,6 +149,10 @@ class OfflineSearch extends Component {
             );
             }
             this.setState({ fieldsArray: newFieldsArray });
+            this.setState({ tinderCards: newTinderCards });
+            // this.setState({ currentIndex: newTinderCards.length-3})
+            this.setState({ matchList: newMatchList})
+            this.setState({ currentIndex: newTinderCards.length-1})
         }));
     }
   
@@ -132,7 +168,12 @@ class OfflineSearch extends Component {
                   <div>
             <CssBaseline />
             <div className={classes.paper}>
-                {this.state.fieldsArray}
+            <div className='cardContainer'>
+                {this.state.tinderCards}
+                </div>
+            {this.state.currentIndex != null && this.state.matchList[this.state.currentIndex].like_mindness}
+                      <div className='buttons'>
+      </div>
             </div>
           </div>
       </Container>

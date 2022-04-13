@@ -81,6 +81,8 @@ class UserInfo(models.Model):
         on_delete=models.SET_NULL
     )
 
+    photo = models.ImageField(upload_to='photos', null=True)
+
     def __str__(self):
         return 'Info\ncountry:{}, langs: {}, interests: {}, pol_coords: {}, age: {}, location: {}, gender: {}, personality: {}'.format(self.country, self.languages, self.interests, self.polit_coordinates, self.age, self.location, self.gender, self.personality)
 

@@ -368,7 +368,9 @@ class Profile extends Component {
     genderPref: '',
     ageRange:[1,100],
     ageOptimal: 25,
-    description: ''
+    description: '',
+    photo: '',
+    image: '',
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -393,6 +395,16 @@ class Profile extends Component {
     const {user} =this.context;
     var state = this.state
     state['user_id'] = user.user_id
+    // fetch('http://localhost:8000/chat/update_profile/', {
+    //   method: 'POST', // или 'PUT'
+    //   body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // })
+    //     .then(response => response.json().then((text) => {
+
+    //     }));
     fetch('http://localhost:8000/chat/update_profile/', {
       method: 'POST', // или 'PUT'
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
@@ -404,6 +416,24 @@ class Profile extends Component {
 
         }));
   }
+    handleImageChange = (e) => {
+      const {user} =this.context;
+    this.setState({
+      image: e.target.files[0]
+    })
+    console.log(this.state);
+    let form_data = new FormData();
+    form_data.append('image', e.target.files[0]);
+    form_data.append('user_id', user.custom_user_id)
+    let url = 'http://localhost:8000/chat/upload_profile_photo/';
+    fetch(url, {
+      method: 'POST',
+      body: form_data,
+    })
+        .then(res => {
+        })
+  };
+
 
   componentDidMount() {
     const {user} =this.context;
@@ -472,7 +502,8 @@ class Profile extends Component {
             genderPref: gender_pref_reformed,
             ageRange: text.ageRange,
             ageOptimal: text.ageOptimal,
-            description: text.description
+            description: text.description,
+            photo: text.photo
         })
 
     }));
@@ -540,6 +571,10 @@ class Profile extends Component {
               <h3>Tell us about yourself :)</h3>
               {this.state.geo}
               <form className={classes.form} noValidate>
+                <label for="photo">Photo: </label> {this.state.photo}
+                <input type="file"
+                   id="image"
+                   accept="image/png, image/jpeg"  onChange={this.handleImageChange} required/>
                 <TextField
                   variant="outlined"
                   margin="normal"

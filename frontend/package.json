@@ -21,6 +21,7 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "4.0.3",
     "react-select": "^5.2.1",
+    "react-tinder-card": "^1.4.5",
     "react-toggle-button": "^2.2.0",
     "reactstrap": "^8.9.0",
     "universal-cookie": "^4.0.4",

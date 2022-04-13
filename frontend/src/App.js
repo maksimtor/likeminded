@@ -17,6 +17,7 @@ import { AuthProvider } from './context/AuthContext'
 
 import { RequireAnon } from './context/RequireAnon'
 import { RequireAuth } from './context/RequireAuth'
+import "./App.css";
 
 
 function App() {
