@@ -20,6 +20,7 @@ import json
 import pycountry_convert as pc
 import time
 import threading
+import math
 logger = logging.getLogger(__name__)
 
 class UserView(viewsets.ModelViewSet):  
@@ -77,7 +78,22 @@ def get_most_like_minded(request):
             l1 = calcLikeness(mainUser=userProfile, targetUser=potential_profile)
             l2 = calcLikeness(mainUser=potential_profile, targetUser=userProfile)
             result = (l1+l2)/2
-            accepted_users.append({'id': u.profile.id, 'like_mindness': result, 'name': u.username})
+            photo = 'None'
+            if (u.profile.userInfo.photo):
+                photo = u.profile.userInfo.photo.url
+            distance = 'None'
+            if (u.profile.userInfo.location and user.profile.userInfo.location):
+                R = 6373.0
+                lat1 = math.radians(user.profile.userInfo.location.lat)
+                lon1 = math.radians(user.profile.userInfo.location.lon)
+                lat2 = math.radians(u.profile.userInfo.location.lat)
+                lon2 = math.radians(u.profile.userInfo.location.lon)
+                dlon = lon2 - lon1
+                dlat = lat2 - lat1
+                a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                distance = math.floor(R * c)
+            accepted_users.append({'id': u.profile.id, 'like_mindness': math.floor(result*100), 'name': u.username, 'photo': photo, 'distance': distance, 'age': u.profile.userInfo.age, 'description': u.profile.userInfo.description})
     result_users = sorted(accepted_users, key=lambda d: d['like_mindness'], reverse=True)[0:10]
     print(result_users)
     return JsonResponse({'result': result_users})

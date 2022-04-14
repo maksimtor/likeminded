@@ -64,6 +64,15 @@ class OfflineSearch extends Component {
     currentIndex: null,
   }
 
+  swipe = async(e) => {
+    if (this.state.currentIndex < this.state.fieldsArray.length) {
+      this.setState({currentIndex: this.state.currentIndex+1})
+    }
+    else {
+      this.setState({currentIndex: null})
+    }
+  }
+
   createRoom = async(e) => {
     const {user} =this.context;
                         fetch('http://localhost:8000/chat/send_friend_request/', {
@@ -75,6 +84,7 @@ class OfflineSearch extends Component {
                         })
                             .then(response => response.json().then((text) => {
                                 alert(text.result);
+                                this.swipe();
                             }));
   }
 
@@ -89,6 +99,7 @@ class OfflineSearch extends Component {
                         })
                             .then(response => response.json().then((text) => {
                                 alert(text.result);
+                                this.swipe();
                             }));
   }
 
@@ -123,36 +134,39 @@ class OfflineSearch extends Component {
             let newMatchList = [];
             for (const f_user of text.result){
                 newMatchList.push({like_mindness: f_user.name})
-                newTinderCards.push(
-                <div>
-                  <TinderCard className='swipe' key={f_user.name} onSwipe={(dir) => this.swiped(dir, f_user.id)} onCardLeftScreen={() => this.outOfFrame(f_user.name)}>
-                    <div style={{ backgroundImage: 'url(media/photos/tree.jpg)' }} className='card'>
-                      <h3>{f_user.name}</h3>
-                    </div>
-                  </TinderCard>
-                </div>
-                );
+                let url = 'url(media/photos/tree.jpg)'
+                if (f_user.photo !== 'None'){
+                  url = 'url('+f_user.photo+')'
+                }
+                let distance = 'unknown'
+                if (f_user.distance !== 'None'){
+                  distance = f_user.distance + ' km'
+                }
                 newFieldsArray.push(
                   <div>
+                     <div style={{ backgroundImage: url }} className='card'>
+                      <h3>{f_user.name}</h3>
+                    </div>
                   <Button
                     onClick={e => {
                       this.createRoom({ friend_id: f_user.id});
                     }}
-                  > {f_user.id} - {f_user.like_mindness} - {f_user.name} </Button>
+                  > Accept </Button>
                   <Button
                     onClick={e => {
                       this.ignoreUser({ friend_id: f_user.id});
                     }}
                   >  Ignore
                   </Button>
+                  You match on {f_user.like_mindness} percent.
+                  Distance is {distance}
+                  Description: {f_user.description}
+                  Age is {f_user.age}
                   </div>
             );
             }
             this.setState({ fieldsArray: newFieldsArray });
-            this.setState({ tinderCards: newTinderCards });
-            // this.setState({ currentIndex: newTinderCards.length-3})
-            this.setState({ matchList: newMatchList})
-            this.setState({ currentIndex: newTinderCards.length-1})
+            this.setState({ currentIndex: 0})
         }));
     }
   
@@ -169,11 +183,8 @@ class OfflineSearch extends Component {
             <CssBaseline />
             <div className={classes.paper}>
             <div className='cardContainer'>
-                {this.state.tinderCards}
-                </div>
-            {this.state.currentIndex != null && this.state.matchList[this.state.currentIndex].like_mindness}
-                      <div className='buttons'>
-      </div>
+            {this.state.currentIndex != null ? this.state.fieldsArray[this.state.currentIndex] : 'No potential users :('}
+            </div>
             </div>
           </div>
       </Container>
