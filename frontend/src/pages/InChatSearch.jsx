@@ -371,7 +371,8 @@ class InChatSearch extends Component {
     canUnblind: false,              // get data from api if partner is registered
     unblindRequestSent: false,      
     unblindRequestReceived: false,
-    unblinded: false
+    unblinded: false,
+    status: 'prepare',
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -427,10 +428,23 @@ class InChatSearch extends Component {
     this.setState({ geoLon: pos.coords.longitude });
   }
 
+  endChat = (e) => {
+    this.client.close();
+    this.setState({ status: 'ended' });
+  }
+
+  stopSearch = (e) => {
+    this.setState( {status: 'prepare'});
+    this.searchClient.close();
+    e.preventDefault();
+  }
+
 
   enterRoom = async(e) => {
-            const {user} =this.context;
+          this.setState({status: 'searching'});
+          const {user} = this.context;
           let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + user.custom_user_id + '/');
+          this.searchClient = client;
           client.onopen = function(e) {
             client.send(JSON.stringify({
               type: "message",
@@ -456,12 +470,13 @@ class InChatSearch extends Component {
                     message: user.custom_user_id,
                     name: "name"
                   })), 2000);
+              this.setState({ status: 'chatting' })
               };
               this.client.onmessage = (message) => {
                 const dataFromServer = JSON.parse(message.data);
                 if (dataFromServer) {
                   if (dataFromServer.type === 'exit_message') {
-                    this.setState({ isLoggedIn: false });
+                    this.setState({ status: 'ended' });
 
                   }
                   else if (dataFromServer.type === 'possible_unblind'){
@@ -476,7 +491,7 @@ class InChatSearch extends Component {
                           }
                         })
                             .then(response => response.json().then((text) => {
-                                alert("chat created")
+                                
                             }));
                     }
                   }
@@ -574,15 +589,17 @@ class InChatSearch extends Component {
   }
   
   componentWillUpdate(nextProps, nextState) {
-    localStorage.setItem('user', JSON.stringify(nextState));
+    // localStorage.setItem('user', JSON.stringify(nextState));
   }
+
+
 
   render() {
     // window.navigator.geolocation.getCurrentPosition(this.success, this.success);
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs">
-        {this.state.isLoggedIn ?
+        {this.state.status === 'chatting' || this.state.status === 'ended' ?
           <div style={{ marginTop: 50, }}>
             Room Name: {this.state.room}
             <Paper style={{ height: 500, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
@@ -601,6 +618,23 @@ class InChatSearch extends Component {
               </>)}
             </Paper>
 
+            { this.state.status === 'ended' ?
+
+            <div>
+            <span>Chat ended!</span>
+                <Button
+                  onClick={this.enterRoom}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Start Chatting Again!
+                  </Button>
+            </div>
+            :
+            <div>
             <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
               <TextField
                 id="outlined-helperText"
@@ -621,8 +655,20 @@ class InChatSearch extends Component {
                 color="primary"
                 className={classes.submit}
               >
-                Start Chatting
+                Search again
                 </Button>
+              </form>
+                <Button
+                  onClick={this.endChat}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  End chat!
+                  </Button>
+              </div>}
               {this.state.canUnblind ?
                 <div>
               <Button
@@ -661,10 +707,9 @@ class InChatSearch extends Component {
                 <div></div>
                 }
               {this.state.unblinded ? <div>Unblinded!</div> : <div></div>}
-            </form>
           </div>
 
-          :
+          : this.state.status === 'prepare' ?
 
           <div>
             <CssBaseline />
@@ -699,7 +744,22 @@ class InChatSearch extends Component {
                 </Grid>
               </form>
             </div>
-          </div>}
+          </div>
+
+          : this.state.status === 'searching' ?
+
+          <div>Searching
+                          <Button
+                  onClick={this.stopSearch}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Stop search
+                  </Button></div>
+          : <div></div>}
       </Container>
     )
 

@@ -29,6 +29,9 @@ class ChatSearchConsumer(WebsocketConsumer):
         if (user.user == None):
             print("Deleted")
             user.delete()
+        else:
+            user.status='Stopped'
+            user.save()
         self.send(text_data=json.dumps({
             'message': '',
             'name': '',
@@ -63,6 +66,8 @@ class ChatSearchConsumer(WebsocketConsumer):
                     'name': 'name'
                 }))
                 return 1
+            if User.objects.get(pk=user.pk).status == 'Stopped':
+                return 1
 
         while User.objects.get(pk=user.pk).status == 'Searching':
             print(user.name + "Start searching")
@@ -84,6 +89,8 @@ class ChatSearchConsumer(WebsocketConsumer):
                         'message': User.objects.get(pk=user.pk).room_to_join,
                         'name': 'name'
                     }))
+                    return 1
+                if User.objects.get(pk=user.pk).status == 'Stopped':
                     return 1
             print("Finish searching")
             if best_score > 0 and User.objects.get(pk=best_user).status == "Searching":
@@ -117,6 +124,8 @@ class ChatSearchConsumer(WebsocketConsumer):
         t = threading.Thread(target=self.find_room,args=[self.room_name])
         t.setDaemon(True)
         t.start()
+
+        self.threadToStop = t
 
     # Receive message from room group
     def chat_message(self, event):

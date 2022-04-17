@@ -357,12 +357,14 @@ class Chatsearch extends Component {
     politPref: false,
     intPref: false,
     locPref: false,
-    areaPref: [],
+    areaRestrictToggle: false,
+    areaPref: 10,
     persPref: false,
     goals:{ value: 'AN', label: 'Anything' },
     genderPref: { value: 'A', label: 'Other/Anything' },
     ageRange:[1,100],
-    ageOptimal: 25
+    ageOptimal: 25,
+    status: 'prepare',
   }
 
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
@@ -381,9 +383,19 @@ class Chatsearch extends Component {
     this.setState({ geoLat: pos.coords.latitude });
     this.setState({ geoLon: pos.coords.longitude });
   }
+  endChat = (e) => {
+    this.client.close();
+    this.setState({ status: 'ended' });
+  }
 
+  stopSearch = (e) => {
+    this.setState( {status: 'prepare'});
+    this.searchClient.close();
+    e.preventDefault();
+  }
 
   enterRoom = async(e) => {
+    this.setState({status: 'searching'});
     var json_data = {'name': this.state.name};
     fetch('http://localhost:8000/chat/create_user/', {
       method: 'POST', // или 'PUT'
@@ -394,6 +406,7 @@ class Chatsearch extends Component {
     })
         .then(response => response.json().then((text) => {
           let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + text.user_id + '/');
+          this.searchClient = client;
           client.onopen = function(e) {
             client.send(JSON.stringify({
               type: "message",
@@ -411,13 +424,14 @@ class Chatsearch extends Component {
               this.client.onopen = () => {
                 console.log('WebSocket Client Connected');
               };
+              this.setState({ status: 'chatting' })
               this.client.onmessage = (message) => {
                 const dataFromServer = JSON.parse(message.data);
                 console.log('got reply! ', dataFromServer.type);
                 if (dataFromServer) {
                   if (dataFromServer.type === 'exit_message') {
                     this.setState({ isLoggedIn: false });
-
+                    this.setState({ status: 'ended' });
                   } else {
                     this.setState((state) =>
                       ({
@@ -459,6 +473,7 @@ class Chatsearch extends Component {
           politPref: this.userData.politPref,
           intPref: this.userData.intPref,
           locPref: this.userData.locPref,
+          areaRestrictToggle: this.userData.areaRestrictToggle,
           areaPref: this.userData.areaPref,
           persPref: this.userData.persPref,
           goals: this.userData.goals,
@@ -497,7 +512,7 @@ class Chatsearch extends Component {
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs">
-        {this.state.isLoggedIn ?
+        {this.state.status === 'chatting' || this.state.status === 'ended' ?
           <div style={{ marginTop: 50, }}>
             Room Name: {this.state.room}
             <Paper style={{ height: 500, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
@@ -516,6 +531,22 @@ class Chatsearch extends Component {
               </>)}
             </Paper>
 
+            { this.state.status === 'ended' ?
+            <div>
+            <span>Chat ended!</span>
+                <Button
+                  onClick={this.enterRoom}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Start Chatting Again!
+                  </Button>
+            </div>
+            :
+            <div>
             <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
               <TextField
                 id="outlined-helperText"
@@ -539,9 +570,20 @@ class Chatsearch extends Component {
                 Start Chatting
                 </Button>
             </form>
+                            <Button
+                  onClick={this.endChat}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  End chat!
+                  </Button>
+              </div>}
           </div>
 
-          :
+          : this.state.status === 'prepare' ?
 
           <div>
             <CssBaseline />
@@ -709,17 +751,29 @@ class Chatsearch extends Component {
                   onToggle={(value) => {
                     this.setState({locPref: !value,});
                   }} />
-                <label for="areaPref">Preferred area: </label>
-                <Select
-                 value={this.state.areaPref}
-                 onChange={(value) => {
-                  this.setState({areaPref: value})
-                 }}
-                 name="areapref"
-                 id="areapref"
-                 options={areas_select}
-                 isMulti
-                />
+                <p> Do you want to restrict location area? </p>
+                <ToggleButton
+                  value={ this.state.areaRestrictToggle || false }
+                  onToggle={(value) => {
+                    this.setState({areaRestrictToggle: !value,});
+                  }} />
+                {this.state.areaRestrictToggle ?
+                <div>
+                <label for="areaPref">Restrict area: </label>
+                <Slider
+                  valueLabelDisplay="on"
+                  value={this.state.areaPref}
+                  step={1}
+                  min={0}
+                  max={100}
+                  onChange={(event: any, newValue: any) => {
+                    this.setState({areaPref: newValue})
+                  }} 
+                  />
+                </div>
+                :
+                <div></div>
+                }
                 <p> Do you want to find a person with similar interests? </p>
                 <ToggleButton
                   value={ this.state.intPref || false }
@@ -800,7 +854,21 @@ class Chatsearch extends Component {
                 </Grid>
               </form>
             </div>
-          </div>}
+          </div>
+        : this.state.status === 'searching' ?
+                  <div>Searching
+                          <Button
+                  onClick={this.stopSearch}
+                  type="button"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Stop search
+                  </Button></div>
+          : <div></div>
+        }
       </Container>
     )
 
