@@ -180,7 +180,6 @@ class OfflineSearch extends Component {
     return (
       <Container component="main" maxWidth="xs">
                   <div>
-            <CssBaseline />
             <div className={classes.paper}>
             <div className='cardContainer'>
             {this.state.currentIndex != null ? this.state.fieldsArray[this.state.currentIndex] : 'No potential users :('}

@@ -108,7 +108,6 @@ class HistoricalChats extends Component {
     return (
       <Container component="main" maxWidth="xs">
                   <div>
-            <CssBaseline />
             <div className={classes.paper}>
                 {this.state.fieldsArray}
             </div>

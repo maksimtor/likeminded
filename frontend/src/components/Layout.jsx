@@ -1,28 +1,63 @@
 import { Outlet } from 'react-router-dom';
 import { CustomLink } from './CustomLink';
-import { useContext } from 'react'
+import { useContext, useState, useEffect  } from 'react'
 import AuthContext from '../context/AuthContext';
 import Button from '@material-ui/core/Button';
+import { Button as CustomButton } from './Button';
 
 const Layout = () => {
+      const [click, setClick] = useState(false);
+    const [button, setButton] = useState(true);
+
+    const handleClick = () => setClick(!click);
+    const closeMobileMenu = () => setClick(false);
+
+    const showButton = () => {
+        if (window.innerWidth <= 960) {
+          setButton(false);
+        } else {
+          setButton(true);
+        }
+    };
+
+    useEffect(() => {
+        showButton();
+    }, []);
+
+    window.addEventListener('resize', showButton);
     let {user, logoutUser} = useContext(AuthContext)
     if (user) {
         return (
         <>
+        <div className='everything'>
         <header>
-            <CustomLink to="/in_search">Chat</CustomLink>
-            <CustomLink to="/offline_search">Offline search</CustomLink>
-            <CustomLink to="/chats">Chats</CustomLink>
-            <CustomLink to="/historical_chats">Historical chats</CustomLink>
-            <CustomLink to="/profile">Profile</CustomLink>
-            <Button color="#aaaaaa" backgroundColor='#DDDDDD' onClick={logoutUser}>Logout</Button>
+            <nav className='navbar'>
+            <div className='navbar-container'>
+                <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
+                    TRVL
+                    <i class='fab fa-typo3' />
+                </CustomLink>
+              <div className='menu-icon' onClick={handleClick}>
+                <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+              </div>
+              <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+                <li className='nav-item'><CustomLink to="/in_search" onClick={closeMobileMenu}>Chat</CustomLink></li>
+                <li className='nav-item'><CustomLink to="/offline_search" onClick={closeMobileMenu}>Swipe</CustomLink></li>
+                <li className='nav-item'><CustomLink to="/chats" onClick={closeMobileMenu}>Chats</CustomLink></li>
+                <li className='nav-item'><CustomLink to="/historical_chats" onClick={closeMobileMenu}>History</CustomLink></li>
+               <li className='nav-item'> <CustomLink to="/profile" onClick={closeMobileMenu}>Profile</CustomLink></li>
+            </ul>
+            {button && <CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Log Out</CustomButton>}
+            </div>
+            </nav>
         </header>
 
         <main className="container">
             <Outlet />
         </main>
 
-        <footer className="container">&copy; ReactRouter Tutorials 2021</footer>
+        <footer>&copy; ReactRouter Tutorials 2021</footer>
+        </div>
         </>
         )
     }

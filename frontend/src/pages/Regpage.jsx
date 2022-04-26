@@ -186,7 +186,6 @@ class Regpage extends Component {
     return (
       <Container component="main" maxWidth="xs">
           <div>
-            <CssBaseline />
             <div className={classes.paper}>
               <Typography component="h1" variant="h5">
                 ChattyRooms

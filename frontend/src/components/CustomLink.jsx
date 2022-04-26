@@ -8,10 +8,8 @@ const CustomLink = ({children, to, ...props}) => {
 
     return (
         <Link
+            className='nav-links'
             to={to}
-            style={{
-                color: match ? 'var(--color-active)' : 'white',
-            }}
             {...props}
         >
             {children}

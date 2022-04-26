@@ -31,7 +31,6 @@ const useStyles = theme => ({
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -303,7 +302,6 @@ class Chatsearch extends Component {
           :
 
           <div>
-            <CssBaseline />
             <div className={classes.paper}>
                 {this.state.fieldsArray}
             </div>

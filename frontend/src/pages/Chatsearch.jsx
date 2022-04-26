@@ -586,7 +586,6 @@ class Chatsearch extends Component {
           : this.state.status === 'prepare' ?
 
           <div>
-            <CssBaseline />
             <div className={classes.paper}>
               <Typography component="h1" variant="h5">
                 ChattyRooms

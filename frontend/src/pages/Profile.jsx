@@ -566,7 +566,6 @@ class Profile extends Component {
           :
 
           <div>
-            <CssBaseline />
             <div>
               <h3>Tell us about yourself :)</h3>
               {this.state.geo}

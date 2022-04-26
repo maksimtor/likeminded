@@ -42,7 +42,7 @@ const useStyles = theme => ({
   },
   root: {
     boxShadow: 'none',
-  }
+  },
 });
 
 const genders = [
@@ -712,7 +712,6 @@ class InChatSearch extends Component {
           : this.state.status === 'prepare' ?
 
           <div>
-            <CssBaseline />
             <div className={classes.paper}>
               <Typography component="h1" variant="h5">
                 ChattyRooms
