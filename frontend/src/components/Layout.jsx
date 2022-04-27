@@ -29,7 +29,6 @@ const Layout = () => {
     if (user) {
         return (
         <>
-        <div className='everything'>
         <header>
             <nav className='navbar'>
             <div className='navbar-container'>
@@ -46,8 +45,8 @@ const Layout = () => {
                 <li className='nav-item'><CustomLink to="/chats" onClick={closeMobileMenu}>Chats</CustomLink></li>
                 <li className='nav-item'><CustomLink to="/historical_chats" onClick={closeMobileMenu}>History</CustomLink></li>
                <li className='nav-item'> <CustomLink to="/profile" onClick={closeMobileMenu}>Profile</CustomLink></li>
+               {button && <li className='nav-item'><CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Logout</CustomButton></li>}
             </ul>
-            {button && <CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Log Out</CustomButton>}
             </div>
             </nav>
         </header>
@@ -57,7 +56,6 @@ const Layout = () => {
         </main>
 
         <footer>&copy; ReactRouter Tutorials 2021</footer>
-        </div>
         </>
         )
     }
