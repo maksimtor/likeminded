@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import console from "react-console";
 import Select from 'react-select'
 import ToggleButton from 'react-toggle-button'
@@ -8,7 +9,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
+// import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -21,6 +22,8 @@ import Slider from '@material-ui/core/Slider';
 import { withStyles } from "@material-ui/core/styles";
 
 import AuthContext from '../context/AuthContext'
+import { FreeButton as CustomButton } from '../components/FreeButton';
+import { CustomLink } from '../components/CustomLink';
 
 const useStyles = theme => ({
   // paper: {
@@ -45,6 +48,10 @@ const useStyles = theme => ({
   // },
   paper: {
     padding: '150px 0',
+    textAlign: 'center',
+  },
+  chatEnd: {
+    textAlign: 'center',
   }
 });
 
@@ -603,9 +610,9 @@ class InChatSearch extends Component {
     return (
       <Container component="main" maxWidth="xs">
         {this.state.status === 'chatting' || this.state.status === 'ended' ?
-          <div style={{ marginTop: 50, }}>
-            Room Name: {this.state.room}
-            <Paper style={{ height: 500, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
+          <div>
+            You are talking to user
+            <Paper style={{ height: 400, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
               {this.state.messages.map(message => <>
                 <Card className={classes.root}>
                   <CardHeader
@@ -624,17 +631,17 @@ class InChatSearch extends Component {
             { this.state.status === 'ended' ?
 
             <div>
-            <span>Chat ended!</span>
-                <Button
+            <div className={classes.chatEnd}>
+            <div className='ended-div'>Chat ended!</div>
+                <CustomButton
                   onClick={this.enterRoom}
                   type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                 >
                   Start Chatting Again!
-                  </Button>
+                  </CustomButton>
+                  </div>
             </div>
             :
             <div>
@@ -651,61 +658,55 @@ class InChatSearch extends Component {
                   this.value = this.state.value;
                 }}
               />
-              <Button
+              <CustomButton
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
               >
                 Search again
-                </Button>
+                </CustomButton>
               </form>
-                <Button
+                <CustomButton
                   onClick={this.endChat}
                   type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                 >
                   End chat!
-                  </Button>
+                  </CustomButton>
               </div>}
               {this.state.canUnblind ?
                 <div>
-              <Button
+              <CustomButton
                   onClick={this.sendUnblindRequest}
                   type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                 >
                   Unblind
-                  </Button>
-                  <Button
+                  </CustomButton>
+                  <CustomButton
+                                    buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                     onClick={e => {
                       this.ignoreUser({ friend_id: this.state.talkingWith});
                     }}
                   >  Ignore
-                  </Button>
+                  </CustomButton>
                   </div>
                 :
                 <div></div>
                 }
 
               {this.state.unblindRequestReceived ?
-              <Button
+              <CustomButton
                   onClick={this.approveUnblindRequest}
                   type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                 >
                   Approve
-                  </Button>
+                  </CustomButton>
                 :
                 <div></div>
                 }
@@ -716,51 +717,32 @@ class InChatSearch extends Component {
 
           <div>
             <div className={classes.paper}>
-              <Typography component="h1" variant="h5">
-                ChattyRooms
-                </Typography>
-              <form className={classes.form} noValidate>
-                
-
-                <Button
+              <form noValidate>
+                <CustomButton
                   onClick={this.enterRoom}
-                  type="button"
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                   fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
                 >
-                  Start Chatting
-                  </Button>
-                <Grid container>
-                  <Grid item xs>
-                    <Link href="#" variant="body2">
-                      Forgot password?
-                      </Link>
-                  </Grid>
-                  <Grid item>
-                    <Link href="#" variant="body2">
-                      {"Don't have an account? Sign Up"}
-                    </Link>
-                  </Grid>
-                </Grid>
+                  Naiti sobesednika
+                  </CustomButton>
+                <div className='or'>or</div>
+                <Link className="mainLink" to="/profile">Izmenit predpochteniya</Link>
               </form>
             </div>
           </div>
 
           : this.state.status === 'searching' ?
 
-          <div>Searching
-                          <Button
+          <div className={classes.paper}><div class="loader"></div>
+                          <CustomButton
                   onClick={this.stopSearch}
                   type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                 >
                   Stop search
-                  </Button></div>
+                  </CustomButton></div>
           : <div></div>}
       </Container>
     )
