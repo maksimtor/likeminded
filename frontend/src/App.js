@@ -8,7 +8,6 @@ import Loginpage from './pages/Loginpage';
 import Regpage from './pages/Regpage';
 
 import InChatSearch from './pages/InChatSearch';
-import HistoricalChats from './pages/HistoricalChats';
 import Profile from './pages/Profile';
 
 import { AuthProvider } from './context/AuthContext'
@@ -28,7 +27,6 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<RequireAnon><Chatsearch /></RequireAnon>} />
               <Route path='in_search' element={<RequireAuth><InChatSearch /></RequireAuth>} />
-              <Route path='historical_chats' element={<RequireAuth><HistoricalChats /></RequireAuth>} />
               <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path='login' element={
                 <RequireAnon>
