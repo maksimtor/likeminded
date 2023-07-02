@@ -475,11 +475,6 @@ class InChatSearch extends Component {
                 //   message: user.custom_user_id,
                 //   name: "name"
                 // }));
-                setTimeout(() => this.client.send(JSON.stringify({
-                    type: "possible_unblind",
-                    message: user.custom_user_id,
-                    name: "name"
-                  })), 2000);
               this.setState({ status: 'chatting' })
               };
               this.client.onmessage = (message) => {
