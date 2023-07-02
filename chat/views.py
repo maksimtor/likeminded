@@ -211,7 +211,10 @@ def get_user_chats(request):
         print(c.participants.exclude(id=user_id)[0].id)
         friend = c.participants.exclude(id=user_id)[0]
         if friend not in cu.ignoredUsers.all() and cu not in friend.ignoredUsers.all():
-            chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': c.messages.order_by('-timestamp').all()[0].message, 'read_last_message': c.messages.order_by('-timestamp').all()[0].read})
+            if c.messages.order_by('-timestamp').all():
+                chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': c.messages.order_by('-timestamp').all()[0].message, 'read_last_message': c.messages.order_by('-timestamp').all()[0].read})
+            else:
+                chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': 'nihuya ney', 'read_last_message': 0})
     print(chat_ids)
     return JsonResponse({'chat_ids': chat_ids})
 
