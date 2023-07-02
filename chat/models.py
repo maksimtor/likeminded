@@ -132,10 +132,7 @@ class CustomUser(models.Model):
     room_to_join = models.IntegerField(null=True)
     userInfo = models.ForeignKey(UserInfo, related_name='user_info', on_delete=models.CASCADE, null=True)
     userPrefs = models.ForeignKey(Preferences, related_name='user_prefs', on_delete=models.CASCADE, null=True)
-    sentFriendRequests = models.ManyToManyField('CustomUser', related_name='receivedFriendRequests')
     ignoredUsers = models.ManyToManyField('CustomUser', related_name='usersIgnoredBy')
-    friends = models.ManyToManyField('CustomUser')
-    historicalChats = models.ManyToManyField('HistoricalChat')
 
     def __str__(self):
         return 'Name: {}\n{}\n{}'.format(self.user, self.userInfo, self.userPrefs)

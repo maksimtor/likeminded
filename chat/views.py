@@ -32,36 +32,6 @@ class ChatView(viewsets.ModelViewSet):
     queryset = Chat.objects.all()
 
 @csrf_exempt
-def create_historical_chat(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    print(data['user1'])
-    user1_id = int(data['user1'])
-    print(data['user2'])
-    user2_id = int(data['user2'])
-
-    chat = HistoricalChat.objects.create(chattedWith=CustomUser.objects.get(id=user2_id))
-    chat.save()
-    me = CustomUser.objects.get(id=user1_id)
-    me.historicalChats.add(chat)
-    me.save()
-    return JsonResponse({'chat_ids': ''})
-
-@csrf_exempt
-def get_historical_chats(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    print(data['user_id'])
-    user_id = data['user_id']
-    reformed_chats = []
-    chats = CustomUser.objects.get(id=int(user_id)).historicalChats.all()
-    print(CustomUser.objects.get(id=int(user_id)).user.username)
-    for c in chats:
-        reformed_chats.append({'id': c.chattedWith.id, 'name':c.chattedWith.name, 'timestamp': c.timestamp})
-    print(reformed_chats)
-    return JsonResponse({'result': reformed_chats})
-
-@csrf_exempt
 def get_most_like_minded(request):
     body_unicode = request.body.decode('utf-8')
     data = json.loads(body_unicode)
@@ -199,26 +169,6 @@ def get_user_profile(request):
     return JsonResponse(user_data)
 
 @csrf_exempt
-def get_user_chats(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    print(data['user_id'])
-    user_id = data['user_id']
-    chat_ids = []
-    cu = CustomUser.objects.get(id=int(user_id))
-    chats = CustomUser.objects.get(id=int(user_id)).chats.all()
-    for c in chats:
-        print(c.participants.exclude(id=user_id)[0].id)
-        friend = c.participants.exclude(id=user_id)[0]
-        if friend not in cu.ignoredUsers.all() and cu not in friend.ignoredUsers.all():
-            if c.messages.order_by('-timestamp').all():
-                chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': c.messages.order_by('-timestamp').all()[0].message, 'read_last_message': c.messages.order_by('-timestamp').all()[0].read})
-            else:
-                chat_ids.append({'chat_id': c.id, 'user_id': c.participants.exclude(id=user_id)[0].id, 'last_message': 'nihuya ney', 'read_last_message': 0})
-    print(chat_ids)
-    return JsonResponse({'chat_ids': chat_ids})
-
-@csrf_exempt
 def create_chat_room(request):
     body_unicode = request.body.decode('utf-8')
     data = json.loads(body_unicode)
@@ -230,31 +180,6 @@ def create_chat_room(request):
     chat_room.participants.add(CustomUser.objects.get(id=user1_id))
     chat_room.participants.add(CustomUser.objects.get(id=user2_id))
     return JsonResponse({'chat_ids': ''})
-
-@csrf_exempt
-def send_friend_request(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    print(data['user1'])
-    user1_id = int(data['user1'])
-    print(data['user2'])
-    user2_id = int(data['user2'])
-    custom_user_1 = CustomUser.objects.get(id=user1_id)
-    custom_user_2 = CustomUser.objects.get(id=user2_id)
-    if custom_user_2 in custom_user_1.receivedFriendRequests.all():
-        chat_room = ChatRoom.objects.create()
-        chat_room.participants.add(CustomUser.objects.get(id=user1_id))
-        chat_room.participants.add(CustomUser.objects.get(id=user2_id))
-        custom_user_1.friends.add(custom_user_2)
-        custom_user_2.friends.add(custom_user_1)
-        custom_user_1.save()
-        custom_user_2.save()
-        return JsonResponse({'result': 'Match!'})
-    else:
-        custom_user_1.sentFriendRequests.add(custom_user_2)
-        custom_user_1.save()
-        custom_user_2.save()
-        return JsonResponse({'result': 'Request sent!'})
 
 @csrf_exempt
 def ignore_user(request):
@@ -269,19 +194,6 @@ def ignore_user(request):
     custom_user_1.ignoredUsers.add(custom_user_2)
     custom_user_1.save()
     return JsonResponse({'result': 'Ignored!'})
-
-@csrf_exempt
-def read_messages(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    chat_id = int(data['chat_id'])
-    friend_id = int(data['friend_id'])
-    messages = ChatRoom.objects.get(id=chat_id).messages.filter(user=CustomUser.objects.get(id=friend_id).user)
-    for m in messages:
-        m.read = True
-        m.save()
-    print(messages)
-    return JsonResponse({'result': 'Read!'})
 
 @csrf_exempt
 def create_user(request):
