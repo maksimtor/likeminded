@@ -41,8 +41,6 @@ const Layout = () => {
               </div>
               <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                 <li className='nav-item'><CustomLink to="/in_search" onClick={closeMobileMenu}>Chat</CustomLink></li>
-                <li className='nav-item'><CustomLink to="/offline_search" onClick={closeMobileMenu}>Swipe</CustomLink></li>
-                <li className='nav-item'><CustomLink to="/chats" onClick={closeMobileMenu}>Chats</CustomLink></li>
                 <li className='nav-item'><CustomLink to="/historical_chats" onClick={closeMobileMenu}>History</CustomLink></li>
                <li className='nav-item'> <CustomLink to="/profile" onClick={closeMobileMenu}>Profile</CustomLink></li>
                {button && <li className='nav-item'><CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Logout</CustomButton></li>}
