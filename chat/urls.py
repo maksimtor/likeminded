@@ -5,7 +5,6 @@ from . import views
 
 router = routers.DefaultRouter()                   
 router.register(r'users', views.UserView, 'user')
-router.register(r'chats', views.ChatView, 'chat')
 
 app_name = 'chat'
 urlpatterns = [

@@ -5,9 +5,9 @@ from django.http import Http404
 from django.template import loader
 from django.urls import reverse
 from django.db.models import Q
-from .models import HistoricalChat, CustomUser, Chat, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences, SearchingInstance, ChatRoom
+from .models import CustomUser, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
-from .serializers import UserSerializer, ChatSerializer
+from .serializers import UserSerializer
 from rest_framework import viewsets
 from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync, sync_to_async
@@ -27,9 +27,9 @@ class UserView(viewsets.ModelViewSet):
     serializer_class = UserSerializer   
     queryset = CustomUser.objects.all()   
 
-class ChatView(viewsets.ModelViewSet):  
-    serializer_class = ChatSerializer   
-    queryset = Chat.objects.all()
+# class ChatView(viewsets.ModelViewSet):  
+#     serializer_class = ChatSerializer   
+#     queryset = Chat.objects.all()
 
 @csrf_exempt
 def get_most_like_minded(request):
@@ -44,26 +44,26 @@ def get_most_like_minded(request):
     accepted_users = []
     for u in users:
         potential_profile = u.profile
-        if (calcAcceptance(mainUser=userProfile, targetUser=potential_profile) == 1 and calcAcceptance(mainUser=potential_profile, targetUser=userProfile) == 1 and potential_profile!=userProfile and potential_profile not in userProfile.sentFriendRequests.all() and potential_profile not in userProfile.ignoredUsers.all() and potential_profile not in userProfile.usersIgnoredBy.all() and potential_profile not in userProfile.friends.all()):
+        if (calcAcceptance(mainUser=userProfile, targetUser=potential_profile) == 1 and calcAcceptance(mainUser=potential_profile, targetUser=userProfile) == 1 and potential_profile!=userProfile and potential_profile not in userProfile.sentFriendRequests.all() and potential_profile not in userProfile.ignored_users.all() and potential_profile not in userProfile.usersIgnoredBy.all() and potential_profile not in userProfile.friends.all()):
             l1 = calcLikeness(mainUser=userProfile, targetUser=potential_profile)
             l2 = calcLikeness(mainUser=potential_profile, targetUser=userProfile)
             result = (l1+l2)/2
             photo = 'None'
-            if (u.profile.userInfo.photo):
-                photo = u.profile.userInfo.photo.url
+            if (u.profile.user_info.photo):
+                photo = u.profile.user_info.photo.url
             distance = 'None'
-            if (u.profile.userInfo.location and user.profile.userInfo.location):
+            if (u.profile.user_info.location and user.profile.user_info.location):
                 R = 6373.0
-                lat1 = math.radians(user.profile.userInfo.location.lat)
-                lon1 = math.radians(user.profile.userInfo.location.lon)
-                lat2 = math.radians(u.profile.userInfo.location.lat)
-                lon2 = math.radians(u.profile.userInfo.location.lon)
+                lat1 = math.radians(user.profile.user_info.location.lat)
+                lon1 = math.radians(user.profile.user_info.location.lon)
+                lat2 = math.radians(u.profile.user_info.location.lat)
+                lon2 = math.radians(u.profile.user_info.location.lon)
                 dlon = lon2 - lon1
                 dlat = lat2 - lat1
                 a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
                 c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
                 distance = math.floor(R * c)
-            accepted_users.append({'id': u.profile.id, 'like_mindness': math.floor(result*100), 'name': u.username, 'photo': photo, 'distance': distance, 'age': u.profile.userInfo.age, 'description': u.profile.userInfo.description})
+            accepted_users.append({'id': u.profile.id, 'like_mindness': math.floor(result*100), 'name': u.username, 'photo': photo, 'distance': distance, 'age': u.profile.user_info.age, 'description': u.profile.user_info.description})
     result_users = sorted(accepted_users, key=lambda d: d['like_mindness'], reverse=True)[0:10]
     print(result_users)
     return JsonResponse({'result': result_users})
@@ -121,7 +121,7 @@ def create_real_user(request):
     ap.save()
     prefs = Preferences.objects.create(age=ap)
     prefs.save()
-    u = CustomUser.objects.create(user=hu, userInfo=info, userPrefs=prefs)
+    u = CustomUser.objects.create(user=hu, user_info=info, user_prefs=prefs)
     u.save()
     return JsonResponse({'problems': 'none'})
 
@@ -135,34 +135,34 @@ def get_user_profile(request):
     custom_user = user.profile
     print(custom_user)
     photo = 'None'
-    if (custom_user.userInfo.photo):
-        photo = custom_user.userInfo.photo.url
+    if (custom_user.user_info.photo):
+        photo = custom_user.user_info.photo.url
     user_data = {
         'name': user.username,
-        'age': custom_user.userInfo.age,
-        'gender': custom_user.userInfo.gender,
-        'interests': custom_user.userInfo.interests,
-        'locToggle': custom_user.userInfo.location != None,
-        'geoLat': custom_user.userInfo.location.lat,
-        'geoLon': custom_user.userInfo.location.lon,
-        'polEco': custom_user.userInfo.polit_coordinates.eco*10,
-        'polGov': custom_user.userInfo.polit_coordinates.cult*10,
-        'personalityExtraversion': custom_user.userInfo.personality.extraversion*10,
-        'personalityAgreeableness': custom_user.userInfo.personality.agreeableness*10,
-        'personalityOpenness': custom_user.userInfo.personality.openness*10,
-        'personalityConscientiousness': custom_user.userInfo.personality.conscientiousness*10,
-        'personalityNeuroticism': custom_user.userInfo.personality.neuroticism*10,
-        'politPref': custom_user.userPrefs.polit,
-        'intPref': custom_user.userPrefs.interests,
-        'locPref': custom_user.userPrefs.location,
-        'areaPref': custom_user.userPrefs.loc_area,
-        'areaRestrictToggle': custom_user.userPrefs.area_restrict,
-        'persPref': custom_user.userPrefs.personality,
-        'goals': custom_user.userPrefs.goals,
-        'genderPref': custom_user.userPrefs.gender,
-        'ageRange': [custom_user.userPrefs.age.min_age, custom_user.userPrefs.age.max_age],
-        'ageOptimal': custom_user.userPrefs.age.optimal_age,
-        'description': custom_user.userInfo.description,
+        'age': custom_user.user_info.age,
+        'gender': custom_user.user_info.gender,
+        'interests': custom_user.user_info.interests,
+        'locToggle': custom_user.user_info.location != None,
+        'geoLat': custom_user.user_info.location.lat,
+        'geoLon': custom_user.user_info.location.lon,
+        'polEco': custom_user.user_info.polit_coordinates.eco*10,
+        'polGov': custom_user.user_info.polit_coordinates.cult*10,
+        'personalityExtraversion': custom_user.user_info.personality.extraversion*10,
+        'personalityAgreeableness': custom_user.user_info.personality.agreeableness*10,
+        'personalityOpenness': custom_user.user_info.personality.openness*10,
+        'personalityConscientiousness': custom_user.user_info.personality.conscientiousness*10,
+        'personalityNeuroticism': custom_user.user_info.personality.neuroticism*10,
+        'politPref': custom_user.user_prefs.polit,
+        'intPref': custom_user.user_prefs.interests,
+        'locPref': custom_user.user_prefs.location,
+        'areaPref': custom_user.user_prefs.loc_area,
+        'areaRestrictToggle': custom_user.user_prefs.area_restrict,
+        'persPref': custom_user.user_prefs.personality,
+        'goals': custom_user.user_prefs.goals,
+        'genderPref': custom_user.user_prefs.gender,
+        'ageRange': [custom_user.user_prefs.age.min_age, custom_user.user_prefs.age.max_age],
+        'ageOptimal': custom_user.user_prefs.age.optimal_age,
+        'description': custom_user.user_info.description,
         'photo': photo,
     }
     print(user_data)
@@ -170,15 +170,15 @@ def get_user_profile(request):
 
 @csrf_exempt
 def create_chat_room(request):
-    body_unicode = request.body.decode('utf-8')
-    data = json.loads(body_unicode)
-    print(data['user1'])
-    user1_id = int(data['user1'])
-    print(data['user2'])
-    user2_id = int(data['user2'])
-    chat_room = ChatRoom.objects.create()
-    chat_room.participants.add(CustomUser.objects.get(id=user1_id))
-    chat_room.participants.add(CustomUser.objects.get(id=user2_id))
+    # body_unicode = request.body.decode('utf-8')
+    # data = json.loads(body_unicode)
+    # print(data['user1'])
+    # user1_id = int(data['user1'])
+    # print(data['user2'])
+    # user2_id = int(data['user2'])
+    # chat_room = ChatRoom.objects.create()
+    # chat_room.participants.add(CustomUser.objects.get(id=user1_id))
+    # chat_room.participants.add(CustomUser.objects.get(id=user2_id))
     return JsonResponse({'chat_ids': ''})
 
 @csrf_exempt
@@ -191,7 +191,7 @@ def ignore_user(request):
     user2_id = int(data['user2'])
     custom_user_1 = CustomUser.objects.get(id=user1_id)
     custom_user_2 = CustomUser.objects.get(id=user2_id)
-    custom_user_1.ignoredUsers.add(custom_user_2)
+    custom_user_1.ignored_users.add(custom_user_2)
     custom_user_1.save()
     return JsonResponse({'result': 'Ignored!'})
 
@@ -288,7 +288,7 @@ def create_user(request):
         loc_area=userAreaPref,
         )
     user_pref.save()
-    custom_user = CustomUser.objects.create(name=userName, userInfo=user_info, userPrefs=user_pref)
+    custom_user = CustomUser.objects.create(name=userName, user_info=user_info, user_prefs=user_pref)
     custom_user.save()
     print("Created CustomUser " + str(custom_user.pk))
     return JsonResponse({'user_id':custom_user.pk})
@@ -298,7 +298,7 @@ def upload_profile_photo(request):
     user_id = request.POST['user_id']
     photo = request.FILES['image']
     user = CustomUser.objects.get(id=user_id)
-    user.userInfo.photo.save(str(photo), photo)
+    user.user_info.photo.save(str(photo), photo)
     print(photo)
     return JsonResponse({'e':'e'})
 
@@ -373,7 +373,7 @@ def update_profile(request):
     user.username = userName
     profile = user.profile
 
-    info = profile.userInfo
+    info = profile.user_info
     info.interests=userInterestsReformed
     info.description=userDescription
     pol = info.polit_coordinates
@@ -401,7 +401,7 @@ def update_profile(request):
     info.save()
 
 
-    prefs = profile.userPrefs
+    prefs = profile.user_prefs
     prefs.goals=userGoals
     prefs.polit=userPolitPref
     prefs.interests=userIntPref
@@ -418,11 +418,11 @@ def update_profile(request):
     prefs.age_pref = age_pref
     prefs.save()
 
-    profile.userInfo = info
-    profile.userPrefs = prefs
+    profile.user_info = info
+    profile.user_prefs = prefs
     profile.save()
     user.save()
-    print(user.profile.userInfo.location.lat)
+    print(user.profile.user_info.location.lat)
     return JsonResponse({'good': 'good'})
 
 @permission_classes([IsAuthenticated])

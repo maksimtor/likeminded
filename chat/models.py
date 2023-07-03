@@ -121,38 +121,17 @@ class Preferences(models.Model):
     def __str__(self):
         return 'Prefs:\nage: {}, polit: {}, interests: {}, location: {}, goals: {}, gender: {}, personality: {}, loc_area: {}'.format(self.age, self.polit, self.interests, self.location, self.goals, self.gender, self.personality, self.loc_area)
 
-class HistoricalChat(models.Model):
-    chattedWith = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
-    timestamp = models.DateTimeField('date started talking', auto_now_add=True)
-
 class CustomUser(models.Model):
     name = models.CharField(max_length=200, default='anon')
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='profile')
     status = models.CharField(max_length=200, default='Inactive')
     room_to_join = models.IntegerField(null=True)
-    userInfo = models.ForeignKey(UserInfo, related_name='user_info', on_delete=models.CASCADE, null=True)
-    userPrefs = models.ForeignKey(Preferences, related_name='user_prefs', on_delete=models.CASCADE, null=True)
-    ignoredUsers = models.ManyToManyField('CustomUser', related_name='usersIgnoredBy')
+    user_info = models.ForeignKey(UserInfo, related_name='user', on_delete=models.CASCADE, null=True)
+    user_prefs = models.ForeignKey(Preferences, related_name='user', on_delete=models.CASCADE, null=True)
+    ignored_users = models.ManyToManyField('CustomUser', related_name='usersIgnoredBy')
 
     def __str__(self):
-        return 'Name: {}\n{}\n{}'.format(self.user, self.userInfo, self.userPrefs)
-
-class Message(models.Model):
-    message = models.CharField(max_length=200)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)        # change to custom user
-    timestamp = models.DateTimeField('date sent', auto_now_add=True)
-    read = models.BooleanField(default=False)
-
-class ChatRoom(models.Model):
-    participants = models.ManyToManyField(CustomUser, related_name='chats', blank=True)
-    messages = models.ManyToManyField(Message)
+        return 'Name: {}\n{}\n{}'.format(self.user, self.user_info, self.user_prefs)
 
 class Chat(models.Model):
-    #user_1 = models.ForeignKey(User, related_name='user_1', on_delete=models.CASCADE, null=True)
-    #user_2 = models.ForeignKey(User, related_name='user_2', on_delete=models.CASCADE, null=True)
-    user_1 = models.CharField(max_length=200, null=True)
-    user_2 = models.CharField(max_length=200, null=True)
-
-class SearchingInstance(models.Model):
-    is_done = models.BooleanField(max_length=200, default=False)
-    room_to_join = models.IntegerField(null=True)
+    pass

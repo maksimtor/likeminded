@@ -1,7 +1,8 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-from .models import Chat, SearchingInstance, CustomUser as User, ChatRoom, Message
+from .models import CustomUser as User
+from .models import Chat
 from django.contrib.auth.models import User as RealUser
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
 import time
@@ -75,7 +76,7 @@ class ChatSearchConsumer(WebsocketConsumer):
             best_user = None
             best_score = 0
             for target_user in searching_users:
-                if (calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1 and user.id != target_user.id and target_user not in user.ignoredUsers.all() and target_user not in user.usersIgnoredBy.all()):
+                if (calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1 and user.id != target_user.id and target_user not in user.ignored_users.all() and target_user not in user.usersIgnoredBy.all()):
                     l1 = calcLikeness(mainUser=user, targetUser=target_user)
                     l2 = calcLikeness(mainUser=target_user, targetUser=user)
                     result = (l1+l2)/2

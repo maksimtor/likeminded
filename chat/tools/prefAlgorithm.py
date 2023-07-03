@@ -1,4 +1,4 @@
-from chat.models import User, UserInfo, ChatGoal, Gender
+from chat.models import User, UserInfo, Gender, ChatGoal
 from math import sin, cos, sqrt, atan2, radians
 import pycountry_convert as pc
 
@@ -9,30 +9,30 @@ def calcAcceptance(mainUser, targetUser):
 	# filtering part
 
 	# collecting main info and strict prefs
-	mainGoals = mainUser.userPrefs.goals
-	mainLanguages = mainUser.userInfo.languages
-	mainCountry = mainUser.userInfo.country
-	mainAge = mainUser.userInfo.age
-	mainGender = mainUser.userInfo.gender
-	mainAgePrefs = mainUser.userPrefs.age
-	mainGenderPrefs = mainUser.userPrefs.gender
-	mainAreaPrefs = mainUser.userPrefs.loc_area
-	mainAreaRestrictionOn = mainUser.userPrefs.area_restrict
-	mainAreaRestrictionValue = mainUser.userPrefs.loc_area
-	mainLocation = mainUser.userInfo.location
+	mainGoals = mainUser.user_prefs.goals
+	mainLanguages = mainUser.user_info.languages
+	mainCountry = mainUser.user_info.country
+	mainAge = mainUser.user_info.age
+	mainGender = mainUser.user_info.gender
+	mainAgePrefs = mainUser.user_prefs.age
+	mainGenderPrefs = mainUser.user_prefs.gender
+	mainAreaPrefs = mainUser.user_prefs.loc_area
+	mainAreaRestrictionOn = mainUser.user_prefs.area_restrict
+	mainAreaRestrictionValue = mainUser.user_prefs.loc_area
+	mainLocation = mainUser.user_info.location
 
 	# collecting target user info and strict prefs
-	targetGoals = targetUser.userPrefs.goals
-	targetLanguages = targetUser.userInfo.languages
-	targetCountry = targetUser.userInfo.country
-	targetAge = targetUser.userInfo.age
-	targetGender = targetUser.userInfo.gender
-	targetAgePrefs = targetUser.userPrefs.age
-	targetGenderPrefs = targetUser.userPrefs.gender
-	targetAreaPrefs = targetUser.userPrefs.loc_area
-	targetAreaRestrictionOn = targetUser.userPrefs.area_restrict
-	targetAreaRestrictionValue = targetUser.userPrefs.loc_area
-	targetLocation = targetUser.userInfo.location
+	targetGoals = targetUser.user_prefs.goals
+	targetLanguages = targetUser.user_info.languages
+	targetCountry = targetUser.user_info.country
+	targetAge = targetUser.user_info.age
+	targetGender = targetUser.user_info.gender
+	targetAgePrefs = targetUser.user_prefs.age
+	targetGenderPrefs = targetUser.user_prefs.gender
+	targetAreaPrefs = targetUser.user_prefs.loc_area
+	targetAreaRestrictionOn = targetUser.user_prefs.area_restrict
+	targetAreaRestrictionValue = targetUser.user_prefs.loc_area
+	targetLocation = targetUser.user_info.location
 
 	# area checking
 
@@ -113,11 +113,11 @@ def calcAcceptance(mainUser, targetUser):
 
 def calcLikeness(mainUser, targetUser):
 	print('_________________________')
-	mainInfo = mainUser.userInfo
+	mainInfo = mainUser.user_info
 
-	prefs = mainUser.userPrefs
+	prefs = mainUser.user_prefs
 
-	targetData = targetUser.userInfo
+	targetData = targetUser.user_info
 
 	score = 0
 
