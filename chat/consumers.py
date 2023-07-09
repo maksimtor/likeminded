@@ -4,7 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from .models import CustomUser as User
 from .models import Chat
 from django.contrib.auth.models import User as RealUser
-from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
+from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness, AcceptanceCalculator, LikenessCalculator
 import time
 import threading
 
@@ -76,7 +76,14 @@ class ChatSearchConsumer(WebsocketConsumer):
             best_user = None
             best_score = 0
             for target_user in searching_users:
-                if (calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1 and user.id != target_user.id and target_user not in user.ignored_users.all() and target_user not in user.usersIgnoredBy.all()):
+                main_accepts_target = AcceptanceCalculator(main_user=user, target_user=target_user)
+                target_accepts_main = AcceptanceCalculator(main_user=target_user, target_user=user)
+                users_new_match = main_accepts_target.users_match() and target_accepts_main.users_match()
+                print("Listen!")
+                print(main_accepts_target.users_match())
+                print(target_accepts_main.users_match())
+                users_old_match = calcAcceptance(mainUser=user, targetUser=target_user) == 1 and calcAcceptance(mainUser=target_user, targetUser=user) == 1
+                if (users_new_match and user.id != target_user.id and target_user not in user.ignored_users.all() and target_user not in user.usersIgnoredBy.all()):
                     l1 = calcLikeness(mainUser=user, targetUser=target_user)
                     l2 = calcLikeness(mainUser=target_user, targetUser=user)
                     result = (l1+l2)/2

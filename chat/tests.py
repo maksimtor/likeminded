@@ -1,7 +1,7 @@
 from django.test import TestCase
 from chat.models import CustomUser, UserInfo, ChatGoal, PolitCoordinates, GeoCoordinates, Gender, Preferences, AgePref, Personality
 from django.contrib.auth.models import User
-from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
+from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness, AcceptanceCalculator, LikenessCalculator
 from random import randrange
 import pycountry
 import string
@@ -112,7 +112,7 @@ def create_random_user():
         loc_area=loc_area
         )
     user_pref.save()
-    user = CustomUser.objects.create(name="Maksimmas", userInfo=user_info, userPrefs=user_pref)
+    user = CustomUser.objects.create(name="Maksimmas", user_info=user_info, user_prefs=user_pref)
     user.save()
 
     username = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
@@ -130,55 +130,104 @@ class AcceptanceTestCase(TestCase):
         user2 = create_random_user()
         print(calcAcceptance(mainUser=user1, targetUser=user2))
         print(calcAcceptance(mainUser=user2, targetUser=user1))
+        print("_")
+        u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
+        u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
+        print(u1ca.users_match())
+        print(u1ca.error)
+        print(u2ca.users_match())
+        print(u2ca.error)
 
         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
             print(calcLikeness(mainUser=user1, targetUser=user2))
             print(calcLikeness(mainUser=user2, targetUser=user1))
-
+            print("_")
+            u1cl = LikenessCalculator(main_user=user1, target_user=user2)
+            print(u1cl.calc_likeness())
+            u2cl = LikenessCalculator(main_user=user2, target_user=user1)
+            print(u2cl.calc_likeness())
         print('\n')
         user1 = create_random_user()
         user2 = create_random_user()
         print(calcAcceptance(mainUser=user1, targetUser=user2))
         print(calcAcceptance(mainUser=user2, targetUser=user1))
+        print("_")
+        u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
+        u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
+        print(u1ca.users_match())
+        print(u1ca.error)
+        print(u2ca.users_match())
+        print(u2ca.error)
 
         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
             print(calcLikeness(mainUser=user1, targetUser=user2))
             print(calcLikeness(mainUser=user2, targetUser=user1))
-
+            print("_")
+            u1cl = LikenessCalculator(main_user=user1, target_user=user2)
+            print(u1cl.calc_likeness())
+            u2cl = LikenessCalculator(main_user=user2, target_user=user1)
+            print(u2cl.calc_likeness())
         print('\n')
         user1 = create_random_user()
         user2 = create_random_user()
         print(calcAcceptance(mainUser=user1, targetUser=user2))
         print(calcAcceptance(mainUser=user2, targetUser=user1))
+        print("_")
+        u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
+        u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
+        print(u1ca.users_match())
+        print(u1ca.error)
+        print(u2ca.users_match())
+        print(u2ca.error)
 
         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
             print(calcLikeness(mainUser=user1, targetUser=user2))
             print(calcLikeness(mainUser=user2, targetUser=user1))
+            print("_")
+            u1cl = LikenessCalculator(main_user=user1, target_user=user2)
+            print(u1cl.calc_likeness())
+            u2cl = LikenessCalculator(main_user=user2, target_user=user1)
+            print(u2cl.calc_likeness())
         print('\n')
         user1 = create_random_user()
         user2 = create_random_user()
         print(calcAcceptance(mainUser=user1, targetUser=user2))
         print(calcAcceptance(mainUser=user2, targetUser=user1))
+        print("_")
+        u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
+        u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
+        print(u1ca.users_match())
+        print(u1ca.error)
+        print(u2ca.users_match())
+        print(u2ca.error)
 
         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
             print(calcLikeness(mainUser=user1, targetUser=user2))
             print(calcLikeness(mainUser=user2, targetUser=user1))
+            print("_")
+            u1cl = LikenessCalculator(main_user=user1, target_user=user2)
+            print(u1cl.calc_likeness())
+            u2cl = LikenessCalculator(main_user=user2, target_user=user1)
+            print(u2cl.calc_likeness())
         print('\n')
         user1 = create_random_user()
         user2 = create_random_user()
         print(calcAcceptance(mainUser=user1, targetUser=user2))
         print(calcAcceptance(mainUser=user2, targetUser=user1))
+        print("_")
+        u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
+        u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
+        print(u1ca.users_match())
+        print(u1ca.error)
+        print(u2ca.users_match())
+        print(u2ca.error)
 
         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
             print(calcLikeness(mainUser=user1, targetUser=user2))
             print(calcLikeness(mainUser=user2, targetUser=user1))
-
+            print("_")
+            u1cl = LikenessCalculator(main_user=user1, target_user=user2)
+            print(u1cl.calc_likeness())
+            u2cl = LikenessCalculator(main_user=user2, target_user=user1)
+            print(u2cl.calc_likeness())
         print('\n')
-        user1 = create_random_user()
-        user2 = create_random_user()
-        print(calcAcceptance(mainUser=user1, targetUser=user2))
-        print(calcAcceptance(mainUser=user2, targetUser=user1))
-
-        if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-            print(calcLikeness(mainUser=user1, targetUser=user2))
-            print(calcLikeness(mainUser=user2, targetUser=user1))

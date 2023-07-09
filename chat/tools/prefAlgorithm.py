@@ -5,6 +5,231 @@ import pycountry_convert as pc
 def flatten(t):
     return [item for sublist in t for item in sublist]
 
+class AcceptanceCalculator:
+	def __init__(self, main_user, target_user):
+		self.main_prefs = main_user.user_prefs
+		self.main_info = main_user.user_info
+		self.target_prefs = target_user.user_prefs
+		self.target_info = target_user.user_info
+		self.accepted = True
+		self.error = ""
+
+	def users_match(self):
+		return True if (self.areas_match() and self.goals_match() and self.ages_match() and self.genders_match()) else False
+
+	def areas_match(self):
+		main_location = self.main_info.location
+		target_location = self.target_info.location
+		if self.main_prefs.area_restrict or self.target_prefs.area_restrict:
+			if main_location and target_location:
+				R = 6373.0
+
+				lat1 = radians(main_location.lat)
+				lon1 = radians(main_location.lon)
+				lat2 = radians(target_location.lat)
+				lon2 = radians(target_location.lon)
+
+				dlon = lon2 - lon1
+				dlat = lat2 - lat1
+
+				a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+				c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+				distance = R * c
+				if distance > self.main_prefs.loc_area or distance > self.target_prefs.loc_area:
+					self.error = 'Distance is too big for at least one of the parties'
+					return False
+				else:
+					return True
+			else:
+				self.error = 'Locations are not available, though needed for restriction check'
+				return False
+		else:
+			return True
+
+	def goals_match(self):
+		if (self.main_prefs.goals == ChatGoal.ANYTHING) or (self.target_prefs.goals == ChatGoal.ANYTHING):
+			return True
+		elif (self.main_prefs.goals == self.target_prefs.goals):
+			return True
+		else:
+			self.error = 'Goals don\'t match'
+			return False
+
+	def ages_match(self):
+		target_age_prefs = self.target_prefs.age
+		main_age_prefs = self.main_prefs.age
+		target_age = self.target_info.age
+		main_age = self.main_info.age
+		if target_age_prefs and main_age:
+			if (int(main_age) < int(target_age_prefs.min_age) or int(main_age) > int(target_age_prefs.max_age)):
+				self.error = 'Age prefs don\'t match'
+				return False
+		if main_age_prefs and target_age:
+			if (int(target_age) < int(main_age_prefs.min_age) or int(target_age) > int(main_age_prefs.max_age)):
+				self.error = 'Age prefs don\'t match'
+				return False
+		return True
+
+	def genders_match(self):
+		if (self.target_prefs.gender != Gender.ANYTHING):
+			if self.target_prefs.gender != self.main_info.gender:
+				self.error = 'Gender 1 prefs don\'t match'
+				return False
+
+		if (self.main_prefs.gender != Gender.ANYTHING):
+			if self.main_prefs.gender != self.target_info.gender:
+				self.error = 'Gender 2 prefs don\'t match'
+				return False
+		return True
+
+
+class LikenessCalculator:
+	def __init__(self, main_user, target_user):
+		self.main_info = main_user.user_info
+		self.prefs = main_user.user_prefs
+		self.target_data = target_user.user_info
+		self.score = 0
+		self.uni_weight = self.calc_uni_weight()
+
+	def calc_uni_weight(self):
+		uni_weight = 0
+		if self.prefs.polit == True:
+			uni_weight += 1
+
+		if self.prefs.location == True:
+			uni_weight += 1
+
+		if self.prefs.interests == True:
+			uni_weight += 1
+
+		if self.prefs.age:
+			uni_weight += 1
+
+		if self.prefs.personality == True:
+			uni_weight += 1
+
+		return (10/uni_weight)/10
+
+	def calc_polit_likeness(self):
+		if self.prefs.polit == True:
+			if self.target_data.polit_coordinates == None:
+				return 0.4
+			else:
+				dist = sqrt( (self.target_data.polit_coordinates.eco - self.main_info.polit_coordinates.eco)**2 + (self.target_data.polit_coordinates.cult - self.main_info.polit_coordinates.cult)**2 )
+				return 1-dist/2.8284271247461903
+		else:
+			return 0
+
+	def calc_location_likeness(self):
+		if self.prefs.location == True:
+			if self.target_data.location == None:
+				return 0.4
+			else:
+				# approximate radius of earth in km
+				R = 6373.0
+
+				lat1 = radians(self.main_info.location.lat)
+				lon1 = radians(self.main_info.location.lon)
+				lat2 = radians(self.target_data.location.lat)
+				lon2 = radians(self.target_data.location.lon)
+
+				dlon = lon2 - lon1
+				dlat = lat2 - lat1
+
+				a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+				c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+				distance = R * c
+
+				res = 1 - distance/20000
+				return (res ** 6)
+		else:
+			return 0
+
+	def calc_intererests_likeness(self):
+		if self.prefs.interests == True:
+			if self.target_data.interests == None:
+				return 0.4
+			else:
+				l = len(self.main_info.interests)
+				a = flatten(self.main_info.interests)
+				b = flatten(self.target_data.interests)
+				common_elements = list(set(self.main_info.interests).intersection(self.target_data.interests))
+				return len(common_elements)/l
+		else:
+			return 0
+
+	def calc_age_likeness(self):
+		if self.prefs.age:
+			if self.target_data.age == None:
+				return 0.4
+			else:
+				optimal_age = int(self.prefs.age.optimal_age)
+				min_age = int(self.prefs.age.min_age)
+				max_age = int(self.prefs.age.max_age)
+
+				targetAge = int(self.target_data.age)
+
+				max_dist = max(optimal_age-min_age, max_age-optimal_age)
+				act_dist = abs(targetAge-optimal_age)
+				return 1-(act_dist/max_dist)
+		else:
+			return 0
+
+	def calc_personality_likeness(self):
+		if self.prefs.personality:
+			if self.target_data.personality == None:
+				return 0.4
+			else:
+				result = 0
+				# scoring extraversion
+				main_points = self.main_info.personality.extraversion
+				target_points = self.target_data.personality.extraversion
+				max_dist = max(1-main_points, main_points)
+				act_dist = abs(target_points-main_points)
+				r_score = 1-(act_dist/max_dist)
+				result+=r_score*0.2
+
+				# scoring agreeableness
+				main_points = self.main_info.personality.agreeableness
+				target_points = self.target_data.personality.agreeableness
+				max_dist = max(1-main_points, main_points)
+				act_dist = abs(target_points-main_points)
+				r_score = 1-(act_dist/max_dist)
+				result+=r_score*0.2
+
+				# scoring openness
+				main_points = self.main_info.personality.openness
+				target_points = self.target_data.personality.openness
+				max_dist = max(1-main_points, main_points)
+				act_dist = abs(target_points-main_points)
+				r_score = 1-(act_dist/max_dist)
+				result+=r_score*0.2
+
+				# scoring conscientiousness
+				main_points = self.main_info.personality.conscientiousness
+				target_points = self.target_data.personality.conscientiousness
+				max_dist = max(1-main_points, main_points)
+				act_dist = abs(target_points-main_points)
+				r_score = 1-(act_dist/max_dist)
+				result+=r_score*0.2
+
+				# scoring neuroticism
+				main_points = self.main_info.personality.neuroticism
+				target_points = self.target_data.personality.neuroticism
+				max_dist = max(1-main_points, main_points)
+				act_dist = abs(target_points-main_points)
+				r_score = 1-(act_dist/max_dist)
+				result+=r_score*0.2
+				return result
+		else:
+			return 0
+
+	def calc_likeness(self):
+		return self.uni_weight*(self.calc_polit_likeness() + self.calc_location_likeness() + self.calc_intererests_likeness() + self.calc_age_likeness() + self.calc_personality_likeness())
+
+
 def calcAcceptance(mainUser, targetUser):
 	# filtering part
 
