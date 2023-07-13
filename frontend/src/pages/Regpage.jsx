@@ -122,7 +122,7 @@ class Regpage extends Component {
                 if (Object.keys(this.state.errors).length === 0) {
                     fetch('http://localhost:8000/chat/create_real_user/', {
                       method: 'POST', // или 'PUT'
-                      body: JSON.stringify({username: this.state.username, email: this.state.email, password: this.state.password}), // данные могут быть 'строкой' или {объектом}!
+                      body: JSON.stringify({registration: true, username: this.state.username, email: this.state.email, password: this.state.password}), // данные могут быть 'строкой' или {объектом}!
                       headers: {
                         'Content-Type': 'application/json'
                       }

@@ -406,7 +406,7 @@ class Profile extends Component {
 
     //     }));
     fetch('http://localhost:8000/chat/update_profile/', {
-      method: 'POST', // или 'PUT'
+      method: 'PUT', // или 'PUT'
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
       headers: {
         'Content-Type': 'application/json'
@@ -437,9 +437,9 @@ class Profile extends Component {
 
   componentDidMount() {
     const {user} =this.context;
-    fetch('http://localhost:8000/chat/get_user_profile/', {
-      method: 'POST', // или 'PUT'
-      body: JSON.stringify({'user_id': user.user_id}), // данные могут быть 'строкой' или {объектом}!
+    fetch('http://localhost:8000/chat/get_user_profile/' + user.user_id + '/', {
+      method: 'GET', // или 'PUT'
+      // body: JSON.stringify({'user_id': user.user_id}), // данные могут быть 'строкой' или {объектом}!
       headers: {
         'Content-Type': 'application/json'
       }

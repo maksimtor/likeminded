@@ -397,6 +397,8 @@ class Chatsearch extends Component {
   enterRoom = async(e) => {
     this.setState({status: 'searching'});
     var json_data = {'name': this.state.name};
+    var state = this.state
+    state['registration'] = false
     fetch('http://localhost:8000/chat/create_user/', {
       method: 'POST', // или 'PUT'
       body: JSON.stringify(this.state), // данные могут быть 'строкой' или {объектом}!
