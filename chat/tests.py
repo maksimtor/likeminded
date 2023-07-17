@@ -427,3 +427,153 @@ class AcceptanceTestCase(TestCase):
 		u2ca = AcceptanceCalculator(main_user=self.second_user, target_user=self.first_user)
 		self.assertEqual(u1ca.users_match(), True)
 		self.assertEqual(u2ca.users_match(), True)
+
+
+class LikemindnessTestCase(TestCase):
+	def setUp(self):
+		# first user will be rich profile user
+		self.first_user = create_empty_user()
+		self.first_user.user_info.interests = ['music', 'reading', 'hiking', 'art', 'philosophy']
+		self.first_user.user_info.location = GeoCoordinates.objects.create(lat=55.751244, lon=37.618423)
+		self.first_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0.2, cult=0)
+		self.first_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.4, openness=0.8, conscientiousness=0.7, neuroticism=0.8)
+		self.first_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.first_user.user_prefs.polit = True
+		self.first_user.user_prefs.interests = True
+		self.first_user.user_prefs.location = True
+		self.first_user.user_prefs.personality = True
+		self.first_user.user_prefs.goals = ChatGoal.ROMANTIC
+		self.first_user.user_prefs.gender = Gender.FEMALE
+
+		# we will modify info and prefs of second user below
+		self.second_user = create_empty_user()
+		self.second_user.user_prefs.goals = ChatGoal.ROMANTIC
+		self.second_user.user_prefs.gender = Gender.MALE
+
+	def test_only_age(self):
+		self.second_user.user_info.location = None
+		self.second_user.user_info.polit_coordinates=None
+		self.second_user.user_info.personality=None
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.second_user.user_prefs.save()
+		self.second_user.save()
+		# print("oa")
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.50 and u1cl.calc_likeness() < 0.53)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		# print(u2cl.calc_likeness())
+		self.assertTrue(u2cl.calc_likeness() > 0.97 and u2cl.calc_likeness() < 1)
+
+	def test_age_and_location(self):
+		self.second_user.user_info.polit_coordinates=None
+		self.second_user.user_info.personality=None
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=55.093752, lon=38.768862)
+		self.second_user.user_prefs.location = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("Start")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.57 and u1cl.calc_likeness() < 0.61)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.9 and u2cl.calc_likeness() < 0.94)
+		# print(u2cl.calc_likeness())
+		# print("Finish")
+
+	def test_good_pers_long_dist(self):
+		self.second_user.user_info.interests = ['music', 'reading', 'sport', 'guns', 'philosophy']
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=52.993004, lon=78.638656)
+		self.second_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0, cult=0)
+		self.second_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.6, openness=0.7, conscientiousness=0.9, neuroticism=0.7)
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.second_user.user_prefs.polit = True
+		self.second_user.user_prefs.interests = True
+		self.second_user.user_prefs.location = True
+		self.second_user.user_prefs.personality = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("gpld")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.65 and u1cl.calc_likeness() < 0.68)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.65 and u2cl.calc_likeness() < 0.68)
+		# print(u2cl.calc_likeness())
+		# print("Finish")
+
+	def test_bad_pers_close_dist(self):
+		self.second_user.user_info.interests = ['boxing', 'reading', 'sport', 'guns', 'psychology']
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=55.751244, lon=37.618423)
+		self.second_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=-0.6, cult=0.8)
+		self.second_user.user_info.personality=Personality.objects.create(extraversion=0.8, agreeableness=0.3, openness=0.3, conscientiousness=0.3, neuroticism=0.1)
+		self.second_user.user_info.age = 27
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.second_user.user_prefs.polit = True
+		self.second_user.user_prefs.interests = True
+		self.second_user.user_prefs.location = True
+		self.second_user.user_prefs.personality = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("bpcd")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.62 and u1cl.calc_likeness() < 0.65)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.63 and u2cl.calc_likeness() < 0.66)
+		# print(u2cl.calc_likeness())
+		# print("Finish")
+
+	def test_good_pers_bad_age(self):
+		self.second_user.user_info.interests = ['music', 'reading', 'sport', 'guns', 'philosophy']
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=55.751244, lon=37.618423)
+		self.second_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0, cult=0)
+		self.second_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.6, openness=0.7, conscientiousness=0.9, neuroticism=0.7)
+		self.second_user.user_info.age = 28
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.second_user.user_prefs.polit = True
+		self.second_user.user_prefs.interests = True
+		self.second_user.user_prefs.location = True
+		self.second_user.user_prefs.personality = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("Start")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.83 and u1cl.calc_likeness() < 0.86)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.85 and u2cl.calc_likeness() < 0.88)
+		# print(u2cl.calc_likeness())
+		# print("Finish")
+
+	def test_good_everything(self):
+		self.second_user.user_info.interests = ['music', 'reading', 'hiking', 'guns', 'philosophy']
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=55.7981904, lon=37.9679)
+		self.second_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0, cult=0)
+		self.second_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.5, openness=0.8, conscientiousness=0.8, neuroticism=0.8)
+		self.second_user.user_info.age = 24
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.second_user.user_prefs.polit = True
+		self.second_user.user_prefs.interests = True
+		self.second_user.user_prefs.location = True
+		self.second_user.user_prefs.personality = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("Start")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.91 and u1cl.calc_likeness() < 0.94)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.91 and u2cl.calc_likeness() < 0.94)
+		# print(u2cl.calc_likeness())
+		# print("Finish")
+
+	def test_bad_everything(self):
+		self.second_user.user_info.interests = ['boxing', 'reading', 'sport', 'guns', 'psychology']
+		self.second_user.user_info.location = GeoCoordinates.objects.create(lat=52.993004, lon=78.638656)
+		self.second_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=-0.8, cult=0.8)
+		self.second_user.user_info.personality=Personality.objects.create(extraversion=0.8, agreeableness=0.3, openness=0.3, conscientiousness=0.3, neuroticism=0.1)
+		self.second_user.user_info.age = 28
+		self.second_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=32, optimal_age=32)
+		self.second_user.user_prefs.polit = True
+		self.second_user.user_prefs.interests = True
+		self.second_user.user_prefs.location = True
+		self.second_user.user_prefs.personality = True
+		u1cl = LikenessCalculator(main_user=self.first_user, target_user=self.second_user)
+		# print("Start")
+		# print(u1cl.calc_likeness())
+		self.assertTrue(u1cl.calc_likeness() > 0.39 and u1cl.calc_likeness() < 0.42)
+		u2cl = LikenessCalculator(main_user=self.second_user, target_user=self.first_user)
+		self.assertTrue(u2cl.calc_likeness() > 0.36 and u2cl.calc_likeness() < 0.39)
+		# print(u2cl.calc_likeness())
+		# print("Finish")

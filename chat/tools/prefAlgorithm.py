@@ -141,15 +141,17 @@ class LikenessCalculator:
 				c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
 				distance = R * c
-
-				res = 1 - distance/20000
-				return (res ** 6)
+				if distance<2000:
+					res = 1 - distance/2000
+				else:
+					res = 0
+				return (res ** 3)
 		else:
 			return 0
 
 	def calc_intererests_likeness(self):
 		if self.prefs.interests == True:
-			if self.target_data.interests == None:
+			if self.target_data.interests == None or self.target_data.interests == []:
 				return 0.4
 			else:
 				l = len(self.main_info.interests)
@@ -171,9 +173,9 @@ class LikenessCalculator:
 
 				targetAge = int(self.target_data.age)
 
-				max_dist = max(optimal_age-min_age, max_age-optimal_age)
+				max_dist = max(optimal_age-min_age, max_age-optimal_age)+5
 				act_dist = abs(targetAge-optimal_age)
-				return 1-(act_dist/max_dist)
+				return 1-(act_dist/max_dist)**2
 		else:
 			return 0
 
