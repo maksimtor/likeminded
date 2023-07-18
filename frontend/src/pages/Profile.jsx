@@ -405,7 +405,7 @@ class Profile extends Component {
     //     .then(response => response.json().then((text) => {
 
     //     }));
-    fetch('http://localhost:8000/chat/update_profile/', {
+    fetch('http://localhost:8000/chat/chat_user/', {
       method: 'PUT', // или 'PUT'
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
       headers: {
@@ -437,7 +437,7 @@ class Profile extends Component {
 
   componentDidMount() {
     const {user} =this.context;
-    fetch('http://localhost:8000/chat/get_user_profile/' + user.user_id + '/', {
+    fetch('http://localhost:8000/chat/chat_user/' + user.user_id + '/', {
       method: 'GET', // или 'PUT'
       // body: JSON.stringify({'user_id': user.user_id}), // данные могут быть 'строкой' или {объектом}!
       headers: {

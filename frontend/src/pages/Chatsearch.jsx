@@ -399,7 +399,7 @@ class Chatsearch extends Component {
     var json_data = {'name': this.state.name};
     var state = this.state
     state['registration'] = false
-    fetch('http://localhost:8000/chat/create_user/', {
+    fetch('http://localhost:8000/chat/chat_user/', {
       method: 'POST', // или 'PUT'
       body: JSON.stringify(this.state), // данные могут быть 'строкой' или {объектом}!
       headers: {
