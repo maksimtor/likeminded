@@ -43,8 +43,8 @@ class UserView(DetailView):
         body_unicode = request.body.decode('utf-8')
         data = json.loads(body_unicode)
         if data['registration']:
-            create_empty_user(data)
-            return JsonResponse({'problems': 'none'})
+            empty_user = create_empty_user(data)
+            return JsonResponse({'problems': 'none', 'user_id': empty_user.pk})
         else:
             custom_user = create_user_with_profile(data)
             print("Created CustomUser " + str(custom_user.pk))

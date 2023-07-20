@@ -6,231 +6,124 @@ from random import randrange
 import pycountry
 import string
 import random
+from django.test import Client
+import json
 
-# def create_random_user():
-# 	# pol eco
-# 	pol_eco = randrange(-10,10)/10
-# 	# pol cult
-# 	pol_cult = randrange(-10,10)/10
-# 	# geo lat
-# 	geo_lat = randrange(-90,90)
-# 	# geo lon
-# 	geo_lon = randrange(-180,80)
-# 	# langs
-# 	# countries = [country.alpha2 for country in pycountry.countries]
-# 	countries = list(pycountry.countries)
-# 	langs = [countries[randrange(0,len(countries))].alpha_2, countries[randrange(0,len(countries))].alpha_2]
-# 	if (randrange(0,20) != 0):
-# 		langs[0] = 'RU'
-# 	# interests
-# 	interests = ['Music', 'Movies', 'Art', 'Hiking', 'Intenet', 'Books', 'Fashion', 'Sport']
-# 	my_interests = []
-# 	for interest in interests:
-# 		if (randrange(0,2) == 0):
-# 			my_interests.append(interest)
-# 	# age
-# 	age = randrange(18, 50)
-# 	# gender
-# 	gender=Gender.MALE
-# 	rn = randrange(1,3)
-# 	if (rn==1):
-# 		gender=Gender.FEMALE
-# 	# goals null?
-# 	goals = ChatGoal.ANYTHING
-# 	rn = randrange(1,10)
-# 	if (rn == 1):
-# 		goals = ChatGoal.FRIENDSHIP
-# 	elif (rn == 2):
-# 		goals = ChatGoal.ROMANTIC
-# 	# age prefs null?
-# 	age_pref = None
-# 	if (randrange(0,2) == 1):
-# 		age_pref_min = randrange(18, 40)
-# 		age_pref_max = randrange(age_pref_min+1, 100)
-# 		age_pref_opt = randrange(age_pref_min, age_pref_max)
-# 		age_pref = AgePref.objects.create(min_age=age_pref_min, max_age=age_pref_max, optimal_age=age_pref_opt)
-# 		age_pref.save()
-# 	else:
-# 		age_pref = AgePref.objects.create(min_age=18, max_age=100, optimal_age=20)
-# 	# polit boolean
-# 	polit = False
-# 	if (randrange(0,4) != 1):
-# 		polit = True
-# 	# int bool
-# 	inter = False
-# 	if (randrange(0,4) != 1):
-# 		inter = True
-# 	# loc bool
-# 	locat = False
-# 	if (randrange(0,4) != 1):
-# 		locat = True
+def create_random_user():
+	# pol eco
+	pol_eco = randrange(-10,10)/10
+	# pol cult
+	pol_cult = randrange(-10,10)/10
+	# geo lat
+	geo_lat = randrange(-90,90)
+	# geo lon
+	geo_lon = randrange(-180,80)
+	# langs
+	# countries = [country.alpha2 for country in pycountry.countries]
+	countries = list(pycountry.countries)
+	langs = [countries[randrange(0,len(countries))].alpha_2, countries[randrange(0,len(countries))].alpha_2]
+	if (randrange(0,20) != 0):
+		langs[0] = 'RU'
+	# interests
+	interests = ['Music', 'Movies', 'Art', 'Hiking', 'Intenet', 'Books', 'Fashion', 'Sport']
+	my_interests = []
+	for interest in interests:
+		if (randrange(0,2) == 0):
+			my_interests.append(interest)
+	# age
+	age = randrange(18, 50)
+	# gender
+	gender=Gender.MALE
+	rn = randrange(1,3)
+	if (rn==1):
+		gender=Gender.FEMALE
+	# goals null?
+	goals = ChatGoal.ANYTHING
+	rn = randrange(1,10)
+	if (rn == 1):
+		goals = ChatGoal.FRIENDSHIP
+	elif (rn == 2):
+		goals = ChatGoal.ROMANTIC
+	# age prefs null?
+	age_pref = None
+	if (randrange(0,2) == 1):
+		age_pref_min = randrange(18, 40)
+		age_pref_max = randrange(age_pref_min+1, 100)
+		age_pref_opt = randrange(age_pref_min, age_pref_max)
+		age_pref = AgePref.objects.create(min_age=age_pref_min, max_age=age_pref_max, optimal_age=age_pref_opt)
+		age_pref.save()
+	else:
+		age_pref = AgePref.objects.create(min_age=18, max_age=100, optimal_age=20)
+	# polit boolean
+	polit = False
+	if (randrange(0,4) != 1):
+		polit = True
+	# int bool
+	inter = False
+	if (randrange(0,4) != 1):
+		inter = True
+	# loc bool
+	locat = False
+	if (randrange(0,4) != 1):
+		locat = True
 
-# 	area_restrict = False
-# 	if (randrange(0,4) != 1):
-# 		area_restrict = True
+	area_restrict = False
+	if (randrange(0,4) != 1):
+		area_restrict = True
 
-# 	loc_area = randrange(0,20000)
+	loc_area = randrange(0,20000)
 
-# 	personality_bool = False
-# 	if (randrange(0,4) != 1):
-# 		personality_bool = True
-# 	personality = Personality.objects.create(extraversion=(randrange(0,10)/10), agreeableness=(randrange(0,10)/10), openness=(randrange(0,10)/10), conscientiousness=(randrange(0,10)/10), neuroticism=(randrange(0,10)/10))
+	personality_bool = False
+	if (randrange(0,4) != 1):
+		personality_bool = True
+	personality = Personality.objects.create(extraversion=(randrange(0,10)/10), agreeableness=(randrange(0,10)/10), openness=(randrange(0,10)/10), conscientiousness=(randrange(0,10)/10), neuroticism=(randrange(0,10)/10))
 
-# 	# gender bool
-# 	pref_gender = Gender.ANYTHING
-# 	rn = randrange(0,10)
-# 	if (rn == 1):
-# 		pref_gender = Gender.FEMALE
-# 	elif (rn == 2):
-# 		pref_gender = Gender.MALE
+	# gender bool
+	pref_gender = Gender.ANYTHING
+	rn = randrange(0,10)
+	if (rn == 1):
+		pref_gender = Gender.FEMALE
+	elif (rn == 2):
+		pref_gender = Gender.MALE
 
 
-# 	pol = PolitCoordinates.objects.create(eco=pol_eco, cult=pol_cult)
-# 	pol.save()
-# 	geo = GeoCoordinates.objects.create(lat=geo_lat, lon=geo_lon)
-# 	geo.save()
-# 	user_info = UserInfo.objects.create(
-# 		languages=langs,
-# 		interests=my_interests,
-# 		country='DE',
-# 		polit_coordinates=pol,
-# 		location=geo,
-# 		age=age,
-# 		gender=gender,
-# 		personality=personality
-# 		)
-# 	user_info.save()
-# 	user_pref = Preferences.objects.create(
-# 		goals=goals,
-# 		age=age_pref,
-# 		polit=polit,
-# 		interests=inter,
-# 		location=locat,
-# 		gender=pref_gender,
-# 		personality=personality_bool,
-# 		area_restrict=area_restrict,
-# 		loc_area=loc_area
-# 		)
-# 	user_pref.save()
-# 	user = CustomUser.objects.create(name="Maksimmas", user_info=user_info, user_prefs=user_pref)
-# 	user.save()
+	pol = PolitCoordinates.objects.create(eco=pol_eco, cult=pol_cult)
+	pol.save()
+	geo = GeoCoordinates.objects.create(lat=geo_lat, lon=geo_lon)
+	geo.save()
+	user_info = UserInfo.objects.create(
+		languages=langs,
+		interests=my_interests,
+		country='DE',
+		polit_coordinates=pol,
+		location=geo,
+		age=age,
+		gender=gender,
+		personality=personality
+		)
+	user_info.save()
+	user_pref = Preferences.objects.create(
+		goals=goals,
+		age=age_pref,
+		polit=polit,
+		interests=inter,
+		location=locat,
+		gender=pref_gender,
+		personality=personality_bool,
+		area_restrict=area_restrict,
+		loc_area=loc_area
+		)
+	user_pref.save()
+	user = CustomUser.objects.create(name="Maksimmas", user_info=user_info, user_prefs=user_pref)
+	user.save()
 
-# 	username = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
-# 	email = username + '@gmail.com'
-# 	real_user = User.objects.create_user(username=username, email=email, password='123')
-# 	user.user = real_user
-# 	user.save()
-# 	print(user)
-# 	return user
-
-# class AcceptanceTestCase(TestCase):
-#     def test_animals_can_speak(self):
-#         print('\n')
-#         user1 = create_random_user()
-#         user2 = create_random_user()
-#         print(calcAcceptance(mainUser=user1, targetUser=user2))
-#         print(calcAcceptance(mainUser=user2, targetUser=user1))
-#         print("_")
-#         u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
-#         u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
-#         print(u1ca.users_match())
-#         print(u1ca.error)
-#         print(u2ca.users_match())
-#         print(u2ca.error)
-
-#         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-#             print(calcLikeness(mainUser=user1, targetUser=user2))
-#             print(calcLikeness(mainUser=user2, targetUser=user1))
-#             print("_")
-#             u1cl = LikenessCalculator(main_user=user1, target_user=user2)
-#             print(u1cl.calc_likeness())
-#             u2cl = LikenessCalculator(main_user=user2, target_user=user1)
-#             print(u2cl.calc_likeness())
-#         print('\n')
-#         user1 = create_random_user()
-#         user2 = create_random_user()
-#         print(calcAcceptance(mainUser=user1, targetUser=user2))
-#         print(calcAcceptance(mainUser=user2, targetUser=user1))
-#         print("_")
-#         u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
-#         u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
-#         print(u1ca.users_match())
-#         print(u1ca.error)
-#         print(u2ca.users_match())
-#         print(u2ca.error)
-
-#         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-#             print(calcLikeness(mainUser=user1, targetUser=user2))
-#             print(calcLikeness(mainUser=user2, targetUser=user1))
-#             print("_")
-#             u1cl = LikenessCalculator(main_user=user1, target_user=user2)
-#             print(u1cl.calc_likeness())
-#             u2cl = LikenessCalculator(main_user=user2, target_user=user1)
-#             print(u2cl.calc_likeness())
-#         print('\n')
-#         user1 = create_random_user()
-#         user2 = create_random_user()
-#         print(calcAcceptance(mainUser=user1, targetUser=user2))
-#         print(calcAcceptance(mainUser=user2, targetUser=user1))
-#         print("_")
-#         u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
-#         u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
-#         print(u1ca.users_match())
-#         print(u1ca.error)
-#         print(u2ca.users_match())
-#         print(u2ca.error)
-
-#         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-#             print(calcLikeness(mainUser=user1, targetUser=user2))
-#             print(calcLikeness(mainUser=user2, targetUser=user1))
-#             print("_")
-#             u1cl = LikenessCalculator(main_user=user1, target_user=user2)
-#             print(u1cl.calc_likeness())
-#             u2cl = LikenessCalculator(main_user=user2, target_user=user1)
-#             print(u2cl.calc_likeness())
-#         print('\n')
-#         user1 = create_random_user()
-#         user2 = create_random_user()
-#         print(calcAcceptance(mainUser=user1, targetUser=user2))
-#         print(calcAcceptance(mainUser=user2, targetUser=user1))
-#         print("_")
-#         u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
-#         u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
-#         print(u1ca.users_match())
-#         print(u1ca.error)
-#         print(u2ca.users_match())
-#         print(u2ca.error)
-
-#         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-#             print(calcLikeness(mainUser=user1, targetUser=user2))
-#             print(calcLikeness(mainUser=user2, targetUser=user1))
-#             print("_")
-#             u1cl = LikenessCalculator(main_user=user1, target_user=user2)
-#             print(u1cl.calc_likeness())
-#             u2cl = LikenessCalculator(main_user=user2, target_user=user1)
-#             print(u2cl.calc_likeness())
-#         print('\n')
-#         user1 = create_random_user()
-#         user2 = create_random_user()
-#         print(calcAcceptance(mainUser=user1, targetUser=user2))
-#         print(calcAcceptance(mainUser=user2, targetUser=user1))
-#         print("_")
-#         u1ca = AcceptanceCalculator(main_user=user1, target_user=user2)
-#         u2ca = AcceptanceCalculator(main_user=user2, target_user=user1)
-#         print(u1ca.users_match())
-#         print(u1ca.error)
-#         print(u2ca.users_match())
-#         print(u2ca.error)
-
-#         if (calcAcceptance(mainUser=user1, targetUser=user2) == 1 and calcAcceptance(mainUser=user1, targetUser=user2) == 1):
-#             print(calcLikeness(mainUser=user1, targetUser=user2))
-#             print(calcLikeness(mainUser=user2, targetUser=user1))
-#             print("_")
-#             u1cl = LikenessCalculator(main_user=user1, target_user=user2)
-#             print(u1cl.calc_likeness())
-#             u2cl = LikenessCalculator(main_user=user2, target_user=user1)
-#             print(u2cl.calc_likeness())
-#         print('\n')
+	username = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
+	email = username + '@gmail.com'
+	real_user = User.objects.create_user(username=username, email=email, password='123')
+	user.user = real_user
+	user.save()
+	print(user)
+	return user
 
 def create_empty_user():
 	personality = Personality.objects.create(extraversion=0.5, agreeableness=0.5, openness=0.5, conscientiousness=0.5, neuroticism=0.5)
@@ -577,3 +470,168 @@ class LikemindnessTestCase(TestCase):
 		self.assertTrue(u2cl.calc_likeness() > 0.36 and u2cl.calc_likeness() < 0.39)
 		# print(u2cl.calc_likeness())
 		# print("Finish")
+
+
+class UserApiTestCase(TestCase):
+	maxDiff = None
+	def test_empty_chat_user(self):
+		c = Client()
+		json_data = json.dumps({"registration": True, "username": 'test_user', "email": "test@gmail.com", "password": "123"})
+		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
+
+		user_id = response.json()['user_id']
+		self.assertEqual(response.status_code, 200)
+
+		response = c.get("/chat/chat_user/" + str(user_id) + "/")
+		self.assertEqual(response.status_code, 200)
+		expected_data = json.dumps({'name': 'test_user',
+			'age': None,
+			'gender': 'M',
+			'interests': None,
+			'locToggle': False,
+			'geoLat': None,
+			'geoLon': None, 
+			'polToggle': False,
+			'polEco': None,
+			'polGov': None,
+			'persToggle': False,
+			'personalityExtraversion': None,
+			'personalityAgreeableness': None,
+			'personalityOpenness': None,
+			'personalityConscientiousness': None,
+			'personalityNeuroticism': None,
+			'politPref': False,
+			'intPref': False,
+			'locPref': False,
+			'areaPref': 10,
+			'areaRestrictToggle': False,
+			'persPref': False,
+			'goals': 'AN',
+			'genderPref': 'A',
+			'ageRange': [18, 100],
+			'ageOptimal': 25,
+			'description': '',
+			'photo': 'None'})
+		self.assertJSONEqual(json.dumps(response.json()), expected_data)
+
+		patch_data = json.dumps({'name': 'test_user', 'user_id': user_id,
+			'age': 24,
+			'gender': {'value': 'F', 'label': 'Female'},
+			'interests': [{'value': '.net', 'label': '.net'}, {'value': '3d-modeling', 'label': '3d-modeling'}, {'value': '3d-printing', 'label': '3d-printing'}],
+			'locToggle': True,
+			'geoLat': 0,
+			'geoLon': 0, 
+			'polToggle': True,
+			'polEco': 0.0,
+			'polGov': 0.0,
+			'persToggle': True,
+			'personalityExtraversion': 5,
+			'personalityAgreeableness': 5,
+			'personalityOpenness': 5,
+			'personalityConscientiousness': 5,
+			'personalityNeuroticism': 5,
+			'politPref': True,
+			'intPref': True,
+			'locPref': True,
+			'areaPref': 10,
+			'areaRestrictToggle': True,
+			'persPref': True,
+			'goals': {'value': 'FR', 'label': 'Friendship'},
+			'genderPref': {'value': 'F', 'label': 'Female'},
+			'ageRange': [24, 28],
+			'ageOptimal': 25,
+			'description': 'Hello :)',
+			'photo': 'None'})
+		expected_data = json.dumps({'name': 'test_user', 
+			'age': 24, 
+			'gender': 'F', 
+			'interests': ['.net', '3d-modeling', '3d-printing'], 
+			'locToggle': True, 
+			'geoLat': 0.0, 
+			'geoLon': 0.0, 
+			'polToggle': True, 
+			'polEco': 0.0, 
+			'polGov': 0.0, 
+			'persToggle': True, 
+			'personalityExtraversion': 5.0, 
+			'personalityAgreeableness': 5.0, 
+			'personalityOpenness': 5.0, 
+			'personalityConscientiousness': 5.0, 
+			'personalityNeuroticism': 5.0, 
+			'politPref': True, 
+			'intPref': True, 
+			'locPref': True, 
+			'areaPref': 10, 
+			'areaRestrictToggle': True, 
+			'persPref': True, 
+			'goals': 'FR', 
+			'genderPref': 'F', 
+			'ageRange': [24, 28], 
+			'ageOptimal': 25, 
+			'description': 'Hello :)', 
+			'photo': 'None'})
+		response = c.put("/chat/chat_user/", patch_data, content_type="application/json")
+		self.assertEqual(response.status_code, 200)
+		response = c.get("/chat/chat_user/" + str(user_id) + "/")
+		self.assertEqual(response.status_code, 200)
+		self.assertJSONEqual(json.dumps(response.json()), expected_data)
+
+	def test_post_online_user(self):
+		c = Client()
+		json_data = json.dumps({"registration": False, 
+			'name': 'test_user',
+			'age': 24,
+			'gender': {'value': 'F', 'label': 'Female'},
+			'interests': [{'value': '.net', 'label': '.net'}, {'value': '3d-modeling', 'label': '3d-modeling'}, {'value': '3d-printing', 'label': '3d-printing'}],
+			'locToggle': True,
+			'geoLat': 0,
+			'geoLon': 0, 
+			'polToggle': True,
+			'polEco': 0.0,
+			'polGov': 0.0,
+			'persToggle': True,
+			'personalityExtraversion': 5,
+			'personalityAgreeableness': 5,
+			'personalityOpenness': 5,
+			'personalityConscientiousness': 5,
+			'personalityNeuroticism': 5,
+			'politPref': True,
+			'intPref': True,
+			'locPref': True,
+			'areaPref': 10,
+			'areaRestrictToggle': True,
+			'persPref': True,
+			'goals': {'value': 'FR', 'label': 'Friendship'},
+			'genderPref': {'value': 'F', 'label': 'Female'},
+			'ageRange': [24, 28],
+			'ageOptimal': 25,
+			'description': 'Hello :)',
+			'photo': 'None'
+			})
+		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 200)
+		user_id = response.json()['user_id']
+		profile = CustomUser.objects.get(pk=user_id)
+		self.assertEqual(profile.user_info.age, 24)
+		self.assertEqual(profile.user_info.description, "Hello :)")
+		self.assertEqual(profile.user_info.gender, Gender.FEMALE)
+		self.assertEqual(profile.user_info.interests, ['.net', '3d-modeling', '3d-printing'])
+		self.assertEqual(profile.user_info.location.lon, 0)
+		self.assertEqual(profile.user_info.polit_coordinates.eco, 0)
+		self.assertEqual(profile.user_info.polit_coordinates.cult, 0)
+		self.assertEqual(profile.user_info.personality.extraversion, 0.5)
+		self.assertEqual(profile.user_info.personality.agreeableness, 0.5)
+		self.assertEqual(profile.user_info.personality.openness, 0.5)
+		self.assertEqual(profile.user_info.personality.conscientiousness, 0.5)
+		self.assertEqual(profile.user_info.personality.neuroticism, 0.5)
+		self.assertTrue(profile.user_prefs.polit)
+		self.assertTrue(profile.user_prefs.interests)
+		self.assertTrue(profile.user_prefs.location)
+		self.assertTrue(profile.user_prefs.personality)
+		self.assertTrue(profile.user_prefs.area_restrict)
+		self.assertEqual(profile.user_prefs.loc_area, 10)
+		self.assertEqual(profile.user_prefs.goals, ChatGoal.FRIENDSHIP)
+		self.assertEqual(profile.user_prefs.gender, Gender.FEMALE)
+		self.assertEqual(profile.user_prefs.age.min_age, 24)
+		self.assertEqual(profile.user_prefs.age.max_age, 28)
+		self.assertEqual(profile.user_prefs.age.optimal_age, 25)

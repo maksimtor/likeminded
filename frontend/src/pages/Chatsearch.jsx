@@ -347,8 +347,10 @@ class Chatsearch extends Component {
     locToggle: false,
     geoLat: 0,
     geoLon: 0,
+    polToggle: false,
     polEco: 5,
     polGov: 5,
+    persToggle: false,
     personalityExtraversion: 5,
     personalityAgreeableness: 5,
     personalityOpenness: 5,
@@ -465,8 +467,10 @@ class Chatsearch extends Component {
           locToggle: this.userData.locToggle,
           geoLat: this.userData.geoLat,
           geoLon: this.userData.geoLon,
+          polToggle: this.userData.polToggle,
           polEco: this.userData.polEco,
           polGov: this.userData.polGov,
+          persToggle: this.userData.persToggle,
           personalityExtraversion: this.userData.personalityExtraversion,
           personalityAgreeableness: this.userData.personalityAgreeableness,
           personalityOpenness: this.userData.personalityOpenness,
@@ -661,30 +665,51 @@ class Chatsearch extends Component {
                 })()}
                 </div>
                 <p> Political coordinates </p>
-                <p>Are you leaning towards left or right? </p>
-                <Slider 
-                  value={this.state.polEco}
-                  step={1}
-                  marks
-                  min={-10}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    this.setState({polEco: newValue})
-                  }} 
-                  />
-                <p>Are you leaning towards liberalism or auth? </p>
-                <Slider 
-                  value={this.state.polGov}
-                  step={1}
-                  marks
-                  min={-10}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    this.setState({polGov: newValue})
-                  }} 
-                  />
+                <ToggleButton
+                  value={ this.state.polToggle || false }
+                  onToggle={(value) => {
+                    this.setState({polToggle: !value,});
+                    //alert(this.state.polToggle)
+                    //if (!this.state.polToggle) {window.navigator.geolocation.getCurrentPosition(this.success, this.success)};
+                  }} />
+                {(() => {
+                  if (this.state.polToggle) {
+                    return (<div><p>Are you leaning towards left or right? </p>
+                      <Slider 
+                        value={this.state.polEco}
+                        step={1}
+                        marks
+                        min={-10}
+                        max={10}
+                        onChange={(event: any, newValue: any) => {
+                          this.setState({polEco: newValue})
+                        }} 
+                        />
+                      <p>Are you leaning towards liberalism or auth? </p>
+                      <Slider 
+                        value={this.state.polGov}
+                        step={1}
+                        marks
+                        min={-10}
+                        max={10}
+                        onChange={(event: any, newValue: any) => {
+                          this.setState({polGov: newValue})
+                        }} 
+                        /></div>)
+                  }
+                })()}
+
                 <p> Personality </p>
-                <p> Extraversion </p>
+                <ToggleButton
+                  value={ this.state.persToggle || false }
+                  onToggle={(value) => {
+                    this.setState({persToggle: !value,});
+                    //alert(this.state.polToggle)
+                    //if (!this.state.polToggle) {window.navigator.geolocation.getCurrentPosition(this.success, this.success)};
+                  }} />
+                {(() => {
+                  if (this.state.persToggle) {
+                    return (<div><p> Extraversion </p>
                 <Slider 
                   value={this.state.personalityExtraversion}
                   step={1}
@@ -738,7 +763,10 @@ class Chatsearch extends Component {
                   onChange={(event: any, newValue: any) => {
                     this.setState({personalityNeuroticism: newValue})
                   }} 
-                  />
+                  /></div>)
+                  }
+                })()}
+                
                 <p> Preferences </p>
                 <p> Do you want to find a person with similar political beliefs? </p>
                 <ToggleButton

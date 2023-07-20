@@ -14,15 +14,17 @@ def convert_user_to_json(user):
 		'gender': custom_user.user_info.gender,
 		'interests': custom_user.user_info.interests,
 		'locToggle': custom_user.user_info.location != None,
-		'geoLat': custom_user.user_info.location.lat,
-		'geoLon': custom_user.user_info.location.lon,
-		'polEco': custom_user.user_info.polit_coordinates.eco*10,
-		'polGov': custom_user.user_info.polit_coordinates.cult*10,
-		'personalityExtraversion': custom_user.user_info.personality.extraversion*10,
-		'personalityAgreeableness': custom_user.user_info.personality.agreeableness*10,
-		'personalityOpenness': custom_user.user_info.personality.openness*10,
-		'personalityConscientiousness': custom_user.user_info.personality.conscientiousness*10,
-		'personalityNeuroticism': custom_user.user_info.personality.neuroticism*10,
+		'geoLat': None if custom_user.user_info.location == None else custom_user.user_info.location.lat,
+		'geoLon': None if custom_user.user_info.location == None else custom_user.user_info.location.lon,
+		'polToggle': custom_user.user_info.polit_coordinates != None,
+		'polEco': None if custom_user.user_info.polit_coordinates == None else custom_user.user_info.polit_coordinates.eco*10,
+		'polGov': None if custom_user.user_info.polit_coordinates == None else custom_user.user_info.polit_coordinates.cult*10,
+		'persToggle': custom_user.user_info.personality != None,
+		'personalityExtraversion': None if custom_user.user_info.personality == None else custom_user.user_info.personality.extraversion*10,
+		'personalityAgreeableness': None if custom_user.user_info.personality == None else custom_user.user_info.personality.agreeableness*10,
+		'personalityOpenness': None if custom_user.user_info.personality == None else custom_user.user_info.personality.openness*10,
+		'personalityConscientiousness': None if custom_user.user_info.personality == None else custom_user.user_info.personality.conscientiousness*10,
+		'personalityNeuroticism': None if custom_user.user_info.personality == None else custom_user.user_info.personality.neuroticism*10,
 		'politPref': custom_user.user_prefs.polit,
 		'intPref': custom_user.user_prefs.interests,
 		'locPref': custom_user.user_prefs.location,
@@ -45,13 +47,7 @@ def create_empty_user(data):
 	password = data['password']
 	hu = User.objects.create_user(username=username, email=email, password=password)
 	hu.save()
-	pc = PolitCoordinates.objects.create(eco=0, cult=0)
-	pc.save()
-	gc = GeoCoordinates.objects.create(lat=0, lon=0)
-	gc.save()
-	pers = Personality.objects.create(extraversion=0.5, agreeableness=0.5, conscientiousness=0.5, openness=0.5, neuroticism=0.5)
-	pers.save()
-	info = UserInfo.objects.create(polit_coordinates=pc, location=gc, personality=pers)
+	info = UserInfo.objects.create()
 	info.save()
 	ap = AgePref.objects.create(min_age=18, max_age=100, optimal_age=25)
 	ap.save()
@@ -59,6 +55,7 @@ def create_empty_user(data):
 	prefs.save()
 	u = CustomUser.objects.create(user=hu, user_info=info, user_prefs=prefs)
 	u.save()
+	return u
 
 def create_user_with_profile(data):
 	print (data)
@@ -85,22 +82,27 @@ def create_user_with_profile(data):
 		userGenderPref = Gender.ANYTHING
 	age_pref = AgePref.objects.create(min_age=data['ageRange'][0], max_age=data['ageRange'][1], optimal_age=data['ageOptimal'])
 	age_pref.save()
-	personality = Personality.objects.create(
-		extraversion=data['personalityExtraversion']/10,
-		agreeableness=data['personalityAgreeableness']/10,
-		openness=data['personalityOpenness']/10,
-		conscientiousness=data['personalityConscientiousness']/10,
-		neuroticism=data['personalityNeuroticism']/10
-	)
-	personality.save()
-	pol = PolitCoordinates.objects.create(eco=data['polEco']/10, cult=data['polGov']/10)
-	pol.save()
+	personality = None
+	if data['persToggle']:
+		personality = Personality.objects.create(
+			extraversion=data['personalityExtraversion']/10,
+			agreeableness=data['personalityAgreeableness']/10,
+			openness=data['personalityOpenness']/10,
+			conscientiousness=data['personalityConscientiousness']/10,
+			neuroticism=data['personalityNeuroticism']/10
+		)
+		personality.save()
+	pol = None
+	if data['polToggle']:
+		pol = PolitCoordinates.objects.create(eco=data['polEco']/10, cult=data['polGov']/10)
+		pol.save()
 	geo = None
 	if (data['locToggle']):
 		print('save geo')
 		geo = GeoCoordinates.objects.create(lat=data['geoLat'], lon=data['geoLon'])
 		geo.save()
 	user_info = UserInfo.objects.create(
+		description=data['description'],
 		interests=[i['value'] for i in data['interests']] if 'interests' in data.keys() else [],
 		polit_coordinates=pol,
 		location=geo,
@@ -126,6 +128,7 @@ def create_user_with_profile(data):
 	return custom_user
 
 def update_user(data):
+	print(data)
 	userGender = data['gender']['value']
 	if (userGender == 'M'):
 		userGender = Gender.MALE
@@ -154,26 +157,56 @@ def update_user(data):
 	info.interests=[i['value'] for i in data['interests']] if 'interests' in data.keys() else []
 	info.description=data['description']
 	pol = info.polit_coordinates
-	pol.eco=data['polEco']/10
-	pol.cult=data['polGov']/10
-	pol.save()
+	if pol:
+		if data['polToggle']:
+			pol.eco=data['polEco']/10
+			pol.cult=data['polGov']/10
+			pol.save()
+		else:
+			pol.delete()
+			pol = None
+	else:
+		if data['polToggle']:
+			pol = PolitCoordinates.objects.create(eco=data['polEco']/10, cult=data['polGov']/10)
+			pol.save()
 	info.polit_coordinates=pol
 	geo = info.location
-	geo.lat=data['geoLat']
-	geo.lon=data['geoLon']
-	geo.save()
+	if geo:
+		if data['locToggle']:
+			geo.lat=data['geoLat']
+			geo.lon=data['geoLon']
+			geo.save()
+		else:
+			geo.delete()
+	else:
+		if data['locToggle']:
+			geo = GeoCoordinates.objects.create(lat = data['geoLat'], lon = data['geoLon'])
+			geo.save()		
 	info.location=geo
 	info.age=data['age']
-	print(info.location.lat)
 	info.gender=userGender
 	personality=info.personality
-	personality.extraversion=data['personalityExtraversion']/10
-	personality.agreeableness=data['personalityAgreeableness']/10
-	personality.openness=data['personalityOpenness']/10
-	personality.conscientiousness=data['personalityConscientiousness']/10
-	personality.neuroticism=data['personalityNeuroticism']/10
-	print(personality.extraversion)
-	personality.save()
+	if personality:
+		if data['persToggle']:
+			personality.extraversion=data['personalityExtraversion']/10
+			personality.agreeableness=data['personalityAgreeableness']/10
+			personality.openness=data['personalityOpenness']/10
+			personality.conscientiousness=data['personalityConscientiousness']/10
+			personality.neuroticism=data['personalityNeuroticism']/10
+			print(personality.extraversion)
+			personality.save()
+		else:
+			personality.delete()
+	else:
+		if data['persToggle']:
+			personality = Personality.objects.create(
+				extraversion=data['personalityExtraversion']/10,
+				agreeableness=data['personalityAgreeableness']/10,
+				openness=data['personalityOpenness']/10,
+				conscientiousness=data['personalityConscientiousness']/10,
+				neuroticism=data['personalityNeuroticism']/10
+			)
+			personality.save()
 	info.personality=personality
 	info.save()
 
