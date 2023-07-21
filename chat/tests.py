@@ -6,8 +6,12 @@ from random import randrange
 import pycountry
 import string
 import random
-from django.test import Client
+from django.test import Client, TestCase
 import json
+from chat.consumers import ChatSearchConsumer
+from channels.testing import WebsocketCommunicator
+from channels.routing import URLRouter
+from django.urls import include, re_path
 
 def create_random_user():
 	# pol eco
@@ -635,3 +639,36 @@ class UserApiTestCase(TestCase):
 		self.assertEqual(profile.user_prefs.age.min_age, 24)
 		self.assertEqual(profile.user_prefs.age.max_age, 28)
 		self.assertEqual(profile.user_prefs.age.optimal_age, 25)
+
+class UserRegistrationTestCase(TestCase):
+	def test_user_registration(self):
+		c = Client()
+		json_data = json.dumps({"registration": True, "username": 'test_user', "email": "test@gmail.com", "password": "123"})
+		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
+
+		user_id = response.json()['user_id']
+		self.assertEqual(response.status_code, 200)
+
+		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "123"})
+		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
+		self.assertEqual(response.json()['problems'], "both")
+
+		json_data = json.dumps({"username": 'test_user', "email": "test1@gmail.com", "password": "123"})
+		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
+		self.assertEqual(response.json()['problems'], "username")
+
+		json_data = json.dumps({"username": 'test_user1', "email": "test@gmail.com", "password": "123"})
+		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
+		self.assertEqual(response.json()['problems'], "email")
+
+		json_data = json.dumps({"username": 'test_user1', "email": "test1@gmail.com", "password": "123"})
+		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
+		self.assertEqual(response.json()['problems'], "none")
+
+		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "1234"})
+		response = c.post("/api/token/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 401)
+
+		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "123"})
+		response = c.post("/api/token/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 200)
