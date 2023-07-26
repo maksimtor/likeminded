@@ -19,6 +19,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Slider from '@material-ui/core/Slider';
 
 import { withStyles } from "@material-ui/core/styles";
+import AuthContext from '../context/AuthContext'
 
 const useStyles = theme => ({
   paper: {
@@ -334,6 +335,7 @@ const sleep = (milliseconds) => {
 }
 
 class Chatsearch extends Component {
+    static contextType = AuthContext
 
   state = {
     isLoggedIn: false,
@@ -397,6 +399,7 @@ class Chatsearch extends Component {
   }
 
   enterRoom = async(e) => {
+    const {csrfTokens} =this.context;
     this.setState({status: 'searching'});
     var json_data = {'name': this.state.name};
     var state = this.state
@@ -405,8 +408,10 @@ class Chatsearch extends Component {
       method: 'POST', // или 'PUT'
       body: JSON.stringify(this.state), // данные могут быть 'строкой' или {объектом}!
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
+      },
+      credentials: "include"
     })
         .then(response => response.json().then((text) => {
           let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + text.user_id + '/');

@@ -16,6 +16,7 @@ from threading import Thread
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.views.generic import DetailView
 from django.utils.decorators import method_decorator
@@ -25,13 +26,11 @@ import pycountry_convert as pc
 import time
 import threading
 import math
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 logger = logging.getLogger(__name__)
+from django.views.decorators.http import require_http_methods
 
-# class UserView(viewsets.ModelViewSet):  
-#     serializer_class = UserSerializer   
-#     queryset = CustomUser.objects.all()   
-
-@method_decorator(csrf_exempt, name='dispatch')
 class UserView(DetailView):
     def get(self, request, user_id):
         print (self)
@@ -49,14 +48,13 @@ class UserView(DetailView):
             custom_user = create_user_with_profile(data)
             print("Created CustomUser " + str(custom_user.pk))
             return JsonResponse({'user_id':custom_user.pk})
-
+    @method_decorator(login_required)
     def put(self, request):
         body_unicode = request.body.decode('utf-8')
         data = json.loads(body_unicode)
         update_user(data)
         return JsonResponse({'good': 'good'})
 
-@method_decorator(csrf_exempt, name='dispatch')
 class ProfilePhoto(View):
     def post(self, request):
         user_id = request.POST['user_id']
@@ -66,7 +64,6 @@ class ProfilePhoto(View):
         print(photo)
         return JsonResponse({'e':'e'})
 
-@method_decorator(csrf_exempt, name='dispatch')
 class IgnoreUser(View):
     def post(self, request):
         body_unicode = request.body.decode('utf-8')
@@ -81,9 +78,12 @@ class IgnoreUser(View):
         custom_user_1.save()
         return JsonResponse({'result': 'Ignored!'})
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class ValidateUserRegistration(View):
+    @method_decorator(ensure_csrf_cookie)
     def post(self, request):
+        print(request.body)
+        print(request.headers)
         body_unicode = request.body.decode('utf-8')
         data = json.loads(body_unicode)
         # Getting CustomUser data
@@ -100,7 +100,6 @@ class ValidateUserRegistration(View):
         else:
             return JsonResponse({'problems': 'none'})
 
-@method_decorator(csrf_exempt, name='dispatch')
 class ValidateLogin(View):
     def post(self, request):
         body_unicode = request.body.decode('utf-8')

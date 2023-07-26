@@ -22,6 +22,7 @@ import { withStyles } from "@material-ui/core/styles";
 
 import AuthContext from '../context/AuthContext'
 
+
 const useStyles = theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -394,9 +395,10 @@ class Profile extends Component {
 
 
   enterRoom = async(e) => {
-    const {user} =this.context;
+    const {user, csrfTokens} =this.context;
     var state = this.state
     state['user_id'] = user.user_id
+    // alert(csrfTokens.csrfToken)
     // fetch('http://localhost:8000/chat/update_profile/', {
     //   method: 'POST', // или 'PUT'
     //   body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
@@ -411,8 +413,10 @@ class Profile extends Component {
       method: 'PUT', // или 'PUT'
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
+      },
+      credentials: "include"
     })
         .then(response => response.json().then((text) => {
 
@@ -435,6 +439,8 @@ class Profile extends Component {
         .then(res => {
         })
   };
+
+
 
 
   componentDidMount() {

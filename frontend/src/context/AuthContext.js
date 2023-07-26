@@ -11,6 +11,7 @@ export const AuthProvider = ({children}) => {
     let [authTokens, setAuthTokens] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
     let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null)
     let [loading, setLoading] = useState(true)
+    let [csrfTokens, setCsrfTokens] = useState(()=> localStorage.getItem('csrfTokens') ? JSON.parse(localStorage.getItem('csrfTokens')) : null)
 
     // const history = useHistory()
 
@@ -29,6 +30,26 @@ export const AuthProvider = ({children}) => {
             setAuthTokens(data)
             setUser(jwt_decode(data.access))
             localStorage.setItem('authTokens', JSON.stringify(data))
+            // history.push('/')
+        }else{
+            alert('Something went wrong!')
+        }
+    }
+
+    let set_csrf = async ()=> {
+        let response = await fetch('http://localhost:8000/api/csrf/', {
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            credentials: "include",
+        })
+        let data = await response.json()
+        // alert(JSON.stringify(data))
+
+        if(response.status === 200){
+            setCsrfTokens(data)
+            localStorage.setItem('csrfTokens', JSON.stringify(data))
             // history.push('/')
         }else{
             alert('Something went wrong!')
@@ -74,11 +95,12 @@ export const AuthProvider = ({children}) => {
         authTokens:authTokens,
         loginUser:loginUser,
         logoutUser:logoutUser,
+        csrfTokens:csrfTokens,
     }
 
 
     useEffect(()=> {
-
+        set_csrf()
         if(loading){
             updateToken()
         }

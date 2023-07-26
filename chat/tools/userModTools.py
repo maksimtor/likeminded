@@ -102,7 +102,6 @@ def create_user_with_profile(data):
 		geo = GeoCoordinates.objects.create(lat=data['geoLat'], lon=data['geoLon'])
 		geo.save()
 	user_info = UserInfo.objects.create(
-		description=data['description'],
 		interests=[i['value'] for i in data['interests']] if 'interests' in data.keys() else [],
 		polit_coordinates=pol,
 		location=geo,

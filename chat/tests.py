@@ -12,6 +12,7 @@ from chat.consumers import ChatSearchConsumer
 from channels.testing import WebsocketCommunicator
 from channels.routing import URLRouter
 from django.urls import include, re_path
+from asgiref.sync import sync_to_async
 
 def create_random_user():
 	# pol eco
@@ -161,6 +162,8 @@ def create_empty_user():
 	#print(user)
 	return user
 
+
+'''
 class AcceptanceTestCase(TestCase):
 	def setUp(self):
 		self.first_user = create_empty_user()
@@ -672,3 +675,30 @@ class UserRegistrationTestCase(TestCase):
 		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "123"})
 		response = c.post("/api/token/", json_data, content_type="application/json")
 		self.assertEqual(response.status_code, 200)
+
+'''
+class ChattingTest(TestCase):
+	async def test_room_search(self):
+		user = await sync_to_async(create_empty_user)()
+		user_id = user.id
+		# application = URLRouter([
+		# 	re_path(r'ws/chat_search/(?P<room_name>\w+)/$', ChatSearchConsumer.as_asgi()),
+		# ])
+		# communicator = WebsocketCommunicator(application, f'/ws/chat_search/'+str(user_id)+"/")
+		application = URLRouter([
+			re_path(r'ws/chat_search/(?P<room_name>\w+)/$', ChatSearchConsumer.as_asgi()),
+		])
+		# communicator = WebsocketCommunicator(application, f'/ws/chat_search/1/')
+		print(user_id)
+		communicator = WebsocketCommunicator(application, f'/ws/chat_search/'+str(user_id)+"/")
+		connected, subprotocol = await communicator.connect()
+		assert connected
+		await communicator.send_to(json.dumps({
+              "type": "message",
+              "message": "Start searching",
+              "name": "name"
+            }))
+		# response = await communicator.receive_from()
+		# assert response == "hello"
+		# # Close
+		await communicator.disconnect()

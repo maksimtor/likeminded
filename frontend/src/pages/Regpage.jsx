@@ -19,7 +19,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Slider from '@material-ui/core/Slider';
 
 import { withStyles } from "@material-ui/core/styles";
-
+import AuthContext from '../context/AuthContext'
 const useStyles = theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -49,7 +49,7 @@ const sleep = (milliseconds) => {
 }
 
 class Regpage extends Component {
-
+    static contextType = AuthContext
     state = {
         isLoggedIn: false,
         username: '',
@@ -97,13 +97,16 @@ class Regpage extends Component {
           copyErrors.password = "Cannot be empty";
         }
         this.setState({ errors: copyErrors});
-
+        const {csrfTokens} =this.context;
+        alert (csrfTokens['X-CSRFToken'])
         fetch('http://localhost:8000/chat/validate_user/', {
           method: 'POST', // или 'PUT'
           body: JSON.stringify({username: this.state.username, email: this.state.email}), // данные могут быть 'строкой' или {объектом}!
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
+          },
+          credentials: "include"
         })
             .then(response => response.json().then((text) => {
                 let copyErrors = { ...this.state.errors};

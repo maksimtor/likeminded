@@ -15,6 +15,11 @@ class AcceptanceCalculator:
 		self.error = ""
 
 	def users_match(self):
+		print("Matching")
+		print(self.areas_match())
+		print(self.goals_match())
+		print(self.ages_match())
+		print(self.genders_match())
 		return True if (self.areas_match() and self.goals_match() and self.ages_match() and self.genders_match()) else False
 
 	def areas_match(self):

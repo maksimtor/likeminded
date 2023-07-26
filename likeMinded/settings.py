@@ -202,9 +202,11 @@ CHANNEL_LAYERS = {
     }
 }
 
+CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SECURE = False
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
-SESSION_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SECURE = False
 SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
@@ -213,3 +215,5 @@ CSP_STYLE_SRC = ("'self unsafe-inline'",)
 CSP_SCRIPT_SRC = ("'self unsafe-inline'",)
 CSP_IMG_SRC = ("'self unsafe-inline'",)
 CSP_FONT_SRC = ("'self unsafe-inline'",)
+
+CORS_ALLOW_CREDENTIALS = True
