@@ -99,43 +99,23 @@ class Regpage extends Component {
         this.setState({ errors: copyErrors});
         const {csrfTokens} =this.context;
         alert (csrfTokens['X-CSRFToken'])
-        fetch('http://localhost:8000/chat/validate_user/', {
-          method: 'POST', // или 'PUT'
-          body: JSON.stringify({username: this.state.username, email: this.state.email}), // данные могут быть 'строкой' или {объектом}!
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
-          },
-          credentials: "include"
-        })
-            .then(response => response.json().then((text) => {
-                let copyErrors = { ...this.state.errors};
-                if (text.problems==='both'){
-                    copyErrors["username"] = "User with this name already exists."
-                    copyErrors["email"] = "User with this email already exists."
-                }
-                else if (text.problems==='email'){
-                    copyErrors["email"] = "User with this email already exists."
-                }
-                else if (text.problems==='username'){
-                    copyErrors["username"] = "User with this name already exists."
-                }
-                this.setState({ errors: copyErrors});
-
-                if (Object.keys(this.state.errors).length === 0) {
-                    fetch('http://localhost:8000/chat/chat_user/', {
+        fetch('http://localhost:8000/chat/api/users/', {
                       method: 'POST', // или 'PUT'
-                      body: JSON.stringify({registration: true, username: this.state.username, email: this.state.email, password: this.state.password}), // данные могут быть 'строкой' или {объектом}!
+                      body: JSON.stringify({registration: true, user: {username: this.state.username, email: this.state.email, password: this.state.password}}), // данные могут быть 'строкой' или {объектом}!
                       headers: {
-                        'Content-Type': 'application/json'
-                      }
+                        'Content-Type': 'application/json',
+                        'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
+                      },
+                      credentials: "include"
                     })
                         .then(response => response.json().then((text) => {
-                            alert("User was created)")
+                            if (text['id']) {
+                              alert("Good job")
+                            }
+                            else if (text['user']){
+                              alert(JSON.stringify(text['user']['non_field_errors']))
+                            }
                         }));
-                }
-                e.preventDefault();
-            }));
 
 
         // //Email

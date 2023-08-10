@@ -54,7 +54,7 @@ class UserInfo(models.Model):
 
     # data
 
-    interests = ArrayField(models.CharField(max_length=200), null=True)
+    interests = ArrayField(models.CharField(max_length=200), null=True, blank=True)
 
     polit_coordinates = models.OneToOneField(
         PolitCoordinates, 

@@ -162,8 +162,6 @@ def create_empty_user():
 	#print(user)
 	return user
 
-
-'''
 class AcceptanceTestCase(TestCase):
 	def setUp(self):
 		self.first_user = create_empty_user()
@@ -478,149 +476,185 @@ class LikemindnessTestCase(TestCase):
 		# print(u2cl.calc_likeness())
 		# print("Finish")
 
-
 class UserApiTestCase(TestCase):
 	maxDiff = None
 	def test_empty_chat_user(self):
 		c = Client()
-		json_data = json.dumps({"registration": True, "username": 'test_user', "email": "test@gmail.com", "password": "123"})
-		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
+		json_data = json.dumps({"registration": True, "user": {"username": 'test_user', "email": "test@gmail.com", "password": "123"}})
+		response = c.post("/chat/api/users/", json_data, content_type="application/json")
 
-		user_id = response.json()['user_id']
-		self.assertEqual(response.status_code, 200)
+		user_id = response.json()['id']
+		self.assertEqual(response.status_code, 201)
 
-		response = c.get("/chat/chat_user/" + str(user_id) + "/")
+		response = c.get("/chat/api/users/" + str(user_id) + "/")
 		self.assertEqual(response.status_code, 200)
-		expected_data = json.dumps({'name': 'test_user',
-			'age': None,
-			'gender': 'M',
-			'interests': None,
-			'locToggle': False,
-			'geoLat': None,
-			'geoLon': None, 
-			'polToggle': False,
-			'polEco': None,
-			'polGov': None,
-			'persToggle': False,
-			'personalityExtraversion': None,
-			'personalityAgreeableness': None,
-			'personalityOpenness': None,
-			'personalityConscientiousness': None,
-			'personalityNeuroticism': None,
-			'politPref': False,
-			'intPref': False,
-			'locPref': False,
-			'areaPref': 10,
-			'areaRestrictToggle': False,
-			'persPref': False,
-			'goals': 'AN',
-			'genderPref': 'A',
-			'ageRange': [18, 100],
-			'ageOptimal': 25,
-			'description': '',
-			'photo': 'None'})
+		expected_data = json.dumps({'id': user_id,
+			'registration': False,
+			'name': 'anon',
+			'user': {
+				'id': response.json()['user']['id'],
+				'username': 'test_user',
+				'email': 'test@gmail.com',
+				'password': response.json()['user']['password']
+				},
+			'user_info': {
+				'description': '',
+				'country': None,
+				'languages': None,
+				'interests': None,
+				'polit_coordinates': None,
+				'age': None,
+				'location': None,
+				'gender': 'M',
+				'personality': None
+				}, 
+			'user_prefs': {
+				'age': {'min_age': 18, 'max_age': 100, 'optimal_age': 25},
+				'polit': False,
+				'interests': False,
+				'location': False,
+				'personality': False,
+				'area_restrict': False,
+				'loc_area': 10,
+				'goals': 'AN',
+				'gender': 'A'
+				}
+			})
 		self.assertJSONEqual(json.dumps(response.json()), expected_data)
 
-		patch_data = json.dumps({'name': 'test_user', 'user_id': user_id,
-			'age': 24,
-			'gender': {'value': 'F', 'label': 'Female'},
-			'interests': [{'value': '.net', 'label': '.net'}, {'value': '3d-modeling', 'label': '3d-modeling'}, {'value': '3d-printing', 'label': '3d-printing'}],
-			'locToggle': True,
-			'geoLat': 0,
-			'geoLon': 0, 
-			'polToggle': True,
-			'polEco': 0.0,
-			'polGov': 0.0,
-			'persToggle': True,
-			'personalityExtraversion': 5,
-			'personalityAgreeableness': 5,
-			'personalityOpenness': 5,
-			'personalityConscientiousness': 5,
-			'personalityNeuroticism': 5,
-			'politPref': True,
-			'intPref': True,
-			'locPref': True,
-			'areaPref': 10,
-			'areaRestrictToggle': True,
-			'persPref': True,
-			'goals': {'value': 'FR', 'label': 'Friendship'},
-			'genderPref': {'value': 'F', 'label': 'Female'},
-			'ageRange': [24, 28],
-			'ageOptimal': 25,
-			'description': 'Hello :)',
-			'photo': 'None'})
-		expected_data = json.dumps({'name': 'test_user', 
-			'age': 24, 
-			'gender': 'F', 
-			'interests': ['.net', '3d-modeling', '3d-printing'], 
-			'locToggle': True, 
-			'geoLat': 0.0, 
-			'geoLon': 0.0, 
-			'polToggle': True, 
-			'polEco': 0.0, 
-			'polGov': 0.0, 
-			'persToggle': True, 
-			'personalityExtraversion': 5.0, 
-			'personalityAgreeableness': 5.0, 
-			'personalityOpenness': 5.0, 
-			'personalityConscientiousness': 5.0, 
-			'personalityNeuroticism': 5.0, 
-			'politPref': True, 
-			'intPref': True, 
-			'locPref': True, 
-			'areaPref': 10, 
-			'areaRestrictToggle': True, 
-			'persPref': True, 
-			'goals': 'FR', 
-			'genderPref': 'F', 
-			'ageRange': [24, 28], 
-			'ageOptimal': 25, 
-			'description': 'Hello :)', 
-			'photo': 'None'})
-		response = c.put("/chat/chat_user/", patch_data, content_type="application/json")
+		patch_data = json.dumps({
+			'name': 'anon',
+			'user_info': {
+				'description': 'Hello',
+				'country': None,
+				'languages': None,
+				'interests': ['.net', '3d-modeling', '3d-printing'],
+				"polit_coordinates": {
+	                "eco": 0.5,
+	                "cult": 0.5
+	            },
+	            "age": 24,
+	            "location": {
+	                "lat": 33.3597,
+	                "lon": 33.758
+	            },
+	            "gender": "M",
+	            "personality": {
+	                "extraversion": 0.9,
+	                "agreeableness": 0.9,
+	                "openness": 0.9,
+	                "conscientiousness": 0.9,
+	                "neuroticism": 0.9
+	            }
+			}, 
+			'user_prefs': {
+				'age': {'min_age': 18, 'max_age': 27, 'optimal_age': 25},
+				'polit': True,
+				'interests': True,
+				'location': True,
+				'personality': True,
+				'area_restrict': True,
+				'loc_area': 10,
+				'goals': 'AN',
+				'gender': 'A'
+				}
+			})
+		response = c.put("/chat/api/users/" + str(user_id) + "/", patch_data, content_type="application/json")
 		self.assertEqual(response.status_code, 200)
-		response = c.get("/chat/chat_user/" + str(user_id) + "/")
+		expected_data = json.dumps({'id': user_id,
+			'registration': False,
+			'name': 'anon',
+			'user': {
+				'id': response.json()['user']['id'],
+				'username': 'test_user',
+				'email': 'test@gmail.com',
+				'password': response.json()['user']['password']
+				},
+			'user_info': {
+				'description': 'Hello',
+				'country': None,
+				'languages': None,
+				'interests': ['.net', '3d-modeling', '3d-printing'],
+				"polit_coordinates": {
+	                "eco": 0.5,
+	                "cult": 0.5
+	            },
+	            "age": 24,
+	            "location": {
+	                "lat": 33.3597,
+	                "lon": 33.758
+	            },
+	            "gender": "M",
+	            "personality": {
+	                "extraversion": 0.9,
+	                "agreeableness": 0.9,
+	                "openness": 0.9,
+	                "conscientiousness": 0.9,
+	                "neuroticism": 0.9
+	            }
+			}, 
+			'user_prefs': {
+				'age': {'min_age': 18, 'max_age': 27, 'optimal_age': 25},
+				'polit': True,
+				'interests': True,
+				'location': True,
+				'personality': True,
+				'area_restrict': True,
+				'loc_area': 10,
+				'goals': 'AN',
+				'gender': 'A'
+				}
+			})
+		response = c.get("/chat/api/users/" + str(user_id) + "/")
 		self.assertEqual(response.status_code, 200)
 		self.assertJSONEqual(json.dumps(response.json()), expected_data)
 
 	def test_post_online_user(self):
 		c = Client()
-		json_data = json.dumps({"registration": False, 
-			'name': 'test_user',
-			'age': 24,
-			'gender': {'value': 'F', 'label': 'Female'},
-			'interests': [{'value': '.net', 'label': '.net'}, {'value': '3d-modeling', 'label': '3d-modeling'}, {'value': '3d-printing', 'label': '3d-printing'}],
-			'locToggle': True,
-			'geoLat': 0,
-			'geoLon': 0, 
-			'polToggle': True,
-			'polEco': 0.0,
-			'polGov': 0.0,
-			'persToggle': True,
-			'personalityExtraversion': 5,
-			'personalityAgreeableness': 5,
-			'personalityOpenness': 5,
-			'personalityConscientiousness': 5,
-			'personalityNeuroticism': 5,
-			'politPref': True,
-			'intPref': True,
-			'locPref': True,
-			'areaPref': 10,
-			'areaRestrictToggle': True,
-			'persPref': True,
-			'goals': {'value': 'FR', 'label': 'Friendship'},
-			'genderPref': {'value': 'F', 'label': 'Female'},
-			'ageRange': [24, 28],
-			'ageOptimal': 25,
-			'description': 'Hello :)',
-			'photo': 'None'
+		json_data = json.dumps({
+			'registration': False,
+			'name': 'test user',
+			'user_info': {
+				'description': 'Hello',
+				'country': None,
+				'languages': None,
+				'interests': ['.net', '3d-modeling', '3d-printing'],
+				"polit_coordinates": {
+	                "eco": 0,
+	                "cult": 0
+	            },
+	            "age": 24,
+	            "location": {
+	                "lat": 0,
+	                "lon": 0
+	            },
+	            "gender": "F",
+	            "personality": {
+	                "extraversion": 0.5,
+	                "agreeableness": 0.5,
+	                "openness": 0.5,
+	                "conscientiousness": 0.5,
+	                "neuroticism": 0.5
+	            }
+			}, 
+			'user_prefs': {
+				'age': {'min_age': 24, 'max_age': 28, 'optimal_age': 25},
+				'polit': True,
+				'interests': True,
+				'location': True,
+				'personality': True,
+				'area_restrict': True,
+				'loc_area': 10,
+				'goals': 'FR',
+				'gender': 'F'
+				}
 			})
-		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
-		self.assertEqual(response.status_code, 200)
-		user_id = response.json()['user_id']
+		response = c.post("/chat/api/users/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 201)
+		user_id = response.json()['id']
 		profile = CustomUser.objects.get(pk=user_id)
 		self.assertEqual(profile.user_info.age, 24)
-		self.assertEqual(profile.user_info.description, "Hello :)")
+		self.assertEqual(profile.user_info.description, "Hello")
 		self.assertEqual(profile.user_info.gender, Gender.FEMALE)
 		self.assertEqual(profile.user_info.interests, ['.net', '3d-modeling', '3d-printing'])
 		self.assertEqual(profile.user_info.location.lon, 0)
@@ -646,35 +680,20 @@ class UserApiTestCase(TestCase):
 class UserRegistrationTestCase(TestCase):
 	def test_user_registration(self):
 		c = Client()
-		json_data = json.dumps({"registration": True, "username": 'test_user', "email": "test@gmail.com", "password": "123"})
-		response = c.post("/chat/chat_user/", json_data, content_type="application/json")
+		json_data = json.dumps({"registration": True, "user": {"username": 'test_user', "email": "test@gmail.com", "password": "123"}})
+		response = c.post("/chat/api/users/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 201)
 
-		user_id = response.json()['user_id']
-		self.assertEqual(response.status_code, 200)
+		json_data = json.dumps({"registration": True, "user": {"username": 'test_user', "email": "test@gmail.com", "password": "123"}})
+		response = c.post("/chat/api/users/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(response.json()['user']['non_field_errors'][0], 'A user with this name already exists.')
+		
+		json_data = json.dumps({"registration": True, "user": {"username": 'test_user1', "email": "test@gmail.com", "password": "123"}})
+		response = c.post("/chat/api/users/", json_data, content_type="application/json")
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(response.json()['user']['non_field_errors'][0], 'A user with this email already exists.')
 
-		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "123"})
-		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
-		self.assertEqual(response.json()['problems'], "both")
-
-		json_data = json.dumps({"username": 'test_user', "email": "test1@gmail.com", "password": "123"})
-		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
-		self.assertEqual(response.json()['problems'], "username")
-
-		json_data = json.dumps({"username": 'test_user1', "email": "test@gmail.com", "password": "123"})
-		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
-		self.assertEqual(response.json()['problems'], "email")
-
-		json_data = json.dumps({"username": 'test_user1', "email": "test1@gmail.com", "password": "123"})
-		response = c.post("/chat/validate_user/", json_data, content_type="application/json")
-		self.assertEqual(response.json()['problems'], "none")
-
-		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "1234"})
-		response = c.post("/api/token/", json_data, content_type="application/json")
-		self.assertEqual(response.status_code, 401)
-
-		json_data = json.dumps({"username": 'test_user', "email": "test@gmail.com", "password": "123"})
-		response = c.post("/api/token/", json_data, content_type="application/json")
-		self.assertEqual(response.status_code, 200)
 
 '''
 class ChattingTest(TestCase):
@@ -702,3 +721,4 @@ class ChattingTest(TestCase):
 		# assert response == "hello"
 		# # Close
 		await communicator.disconnect()
+'''
