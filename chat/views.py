@@ -1,35 +1,37 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.http import HttpResponseRedirect
-from django.http import Http404
-from django.template import loader
-from django.urls import reverse
-from django.db.models import Q
-from .models import CustomUser, Gender, ChatGoal, AgePref, Personality, PolitCoordinates, GeoCoordinates, UserInfo, Preferences
-from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness
+from .models import CustomUser
 from .serializers import CustomUserSerializer
-from rest_framework import viewsets
-from django.views.decorators.csrf import csrf_exempt
-from asgiref.sync import async_to_sync, sync_to_async
-from threading import Thread
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.views import View
-from django.views.generic import DetailView
-from django.utils.decorators import method_decorator
+from rest_framework import status, permissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.views import APIView
+from rest_framework.response import Response
 import logging
-import json
-import pycountry_convert as pc
-import time
-import threading
-import math
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie
 logger = logging.getLogger(__name__)
-from django.views.decorators.http import require_http_methods
 
-class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = CustomUserSerializer
-    queryset = CustomUser.objects.all()
+class UserView(APIView):
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = CustomUserSerializer(users, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = CustomUserSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, id):
+        user = CustomUser.objects.get(id=id)
+        serializer = CustomUserSerializer(user, context={'request': request})
+        return Response(serializer.data)
+    
+    def patch(self, request, id):
+        user = CustomUser.objects.get(id=id)
+        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

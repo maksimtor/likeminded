@@ -422,7 +422,7 @@ class Profile extends Component {
 
 
   enterRoom = async(e) => {
-    const {user, csrfTokens} =this.context;
+    const {user, authTokens, csrfTokens} =this.context;
     var state = this.state
     state['user_id'] = user.user_id
     // alert(csrfTokens.csrfToken)
@@ -453,7 +453,8 @@ class Profile extends Component {
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFTOKEN': csrfTokens['X-CSRFToken']
+        'X-CSRFTOKEN': csrfTokens['X-CSRFToken'],
+        'Authorization': 'Bearer ' + authTokens['access'],
       },
       credentials: "include"
     })
@@ -483,16 +484,16 @@ class Profile extends Component {
 
 
   componentDidMount() {
-    const {user} =this.context;
+    const {user, authTokens} =this.context;
     fetch('http://localhost:8000/chat/api/users/' + user.custom_user_id + '/', {
       method: 'GET', // или 'PUT'
       // body: JSON.stringify({'user_id': user.user_id}), // данные могут быть 'строкой' или {объектом}!
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + authTokens['access'],
       }
     })
         .then(response => response.json().then((text) => {
-          // alert(JSON.stringify(text))
           let gender = text.user_info.gender;
           var gender_reformed;
           for (var i in genders){

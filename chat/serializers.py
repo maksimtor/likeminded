@@ -3,17 +3,6 @@ from .models import CustomUser, Chat, UserInfo, PolitCoordinates, GeoCoordinates
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('id' ,'name')
-
-# class ChatSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Chat
-#         fields = ('id' ,'user_1', 'user_2')
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -107,39 +96,43 @@ class UserInfoSerializer(serializers.ModelSerializer):
             # updating polit_coordinates
             if instance.polit_coordinates:
                 polit_coordinates_serializer = PolitCoordinatesSerializer()
-                polit_coordinates_serializer.update(
+                res = polit_coordinates_serializer.update(
                     instance.polit_coordinates,
                     validated_data.get('polit_coordinates', None)
                     )
+                if not res:
+                    instance.polit_coordinates = None
             elif validated_data['polit_coordinates']:
                 polit_coordinates_serializer=PolitCoordinatesSerializer()
                 polit_coordinates = polit_coordinates_serializer.create(validated_data['polit_coordinates'])
                 instance.polit_coordinates = polit_coordinates
-                instance.save()
             # updating location
             if instance.location:
                 location_serializer = GeoCoordinatesSerializer()
-                location_serializer.update(
+                res = location_serializer.update(
                     instance.location,
                     validated_data.get('location', None)
                     )
+                if not res:
+                    instance.location = None
             elif validated_data['location']:
                 location_serializer=GeoCoordinatesSerializer()
                 location = location_serializer.create(validated_data['location'])
                 instance.location = location
-                instance.save()
             # updating personality
             if instance.personality:
                 personality_serializer = PersonalitySerializer()
-                personality_serializer.update(
+                res = personality_serializer.update(
                     instance.personality,
                     validated_data.get('personality', None)
                     )
+                if not res:
+                    instance.personality = None
             elif validated_data['personality']:
                 personality_serializer=PersonalitySerializer()
                 personality = personality_serializer.create(validated_data['personality'])
                 instance.personality = personality
-                instance.save()
+            instance.save()
         else:
             instance.delete()
             return None
@@ -234,7 +227,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
                 user_prefs = PreferencesSerializer()
                 user_prefs_created = user_prefs.create(validated_data['user_prefs'])
                 return CustomUser.objects.create(name=name, user_info=user_info_created, user_prefs=user_prefs_created)
+
     def update(self, instance, validated_data):
+        print("hi")
         instance.name = validated_data['name']
         if instance.user_info:
             user_info_serializer = UserInfoSerializer()
@@ -246,7 +241,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
             user_info_serializer = UserInfoSerializer()
             user_info = user_info_serializer.create(validated_data['user_info'])
             instance.user_info = user_info
-            instance.save()
         if instance.user_prefs:
             user_prefs_serializer = PreferencesSerializer()
             user_prefs = user_prefs_serializer.update(
@@ -257,5 +251,5 @@ class CustomUserSerializer(serializers.ModelSerializer):
             user_prefs_serializer = PreferencesSerializer()
             user_prefs = user_prefs_serializer.create(validated_data['user_prefs'])
             instance.user_prefs = user_prefs
-            instance.save()
+        instance.save()
         return instance

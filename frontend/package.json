@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "bootstrap": "^4.6.0",
+    "caniuse-lite": "^1.0.30001525",
     "countries-list": "^2.6.1",
     "country-list-js": "^3.1.7",
     "jwt-decode": "^3.1.2",
