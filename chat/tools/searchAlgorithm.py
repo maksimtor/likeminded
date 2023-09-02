@@ -21,7 +21,7 @@ def waiting_for_invite(consumer, user, wait_time):
 
 def search_to_invite(consumer, user):
 	while User.objects.get(pk=user.pk).status == 'Searching':
-		searching_users = User.objects.filter(status="Searching")
+		searching_users = User.objects.filter(status="Searching").select_related('user_info').select_related('user_prefs')
 		(best_user, best_score) = find_most_like_minded(user, searching_users, consumer)
 		if best_score > 0 and User.objects.get(pk=best_user).status == "Searching":
 			join_the_room(user, best_user, consumer)

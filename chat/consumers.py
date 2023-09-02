@@ -44,7 +44,7 @@ class ChatSearchConsumer(WebsocketConsumer):
 
     def find_room(self, user_id):
         print("Start search for user " + str(user_id))
-        user = User.objects.get(pk=int(user_id))
+        user = User.objects.filter(pk=int(user_id)).prefetch_related('ignored_users').prefetch_related('usersIgnoredBy').get()
         user.status = 'Searching'
         user.save()
         print (user.name + " starts waiting for invite")

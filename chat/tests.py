@@ -1,7 +1,8 @@
 from django.test import TestCase
 from chat.models import CustomUser, UserInfo, ChatGoal, PolitCoordinates, GeoCoordinates, Gender, Preferences, AgePref, Personality
 from django.contrib.auth.models import User
-from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness, AcceptanceCalculator, LikenessCalculator
+from chat.tools.prefAlgorithm import AcceptanceCalculator, LikenessCalculator
+from chat.tools.searchAlgorithm import search_to_invite
 from random import randrange
 import pycountry
 import string
@@ -13,6 +14,23 @@ from channels.testing import WebsocketCommunicator
 from channels.routing import URLRouter
 from django.urls import include, re_path
 from asgiref.sync import sync_to_async
+from functools import wraps
+import time
+
+def timeit(func):
+	@wraps(func)
+	def timeit_wrapper(*args, **kwargs):
+		res = 0
+		for i in range(10):
+			start_time = time.perf_counter()
+			result = func(*args, **kwargs)
+			end_time = time.perf_counter()
+			total_time = (end_time - start_time)*1000
+			res += total_time
+		res = res/10
+		print(f'Function {func.__name__}{args} {kwargs} Took averagly {res:.4f} ms')
+		return result
+	return timeit_wrapper
 
 def create_random_user():
 	# pol eco
@@ -530,22 +548,22 @@ class UserApiTestCase(TestCase):
 				'languages': None,
 				'interests': ['.net', '3d-modeling', '3d-printing'],
 				"polit_coordinates": {
-	                "eco": 0.5,
-	                "cult": 0.5
-	            },
-	            "age": 24,
-	            "location": {
-	                "lat": 33.3597,
-	                "lon": 33.758
-	            },
-	            "gender": "M",
-	            "personality": {
-	                "extraversion": 0.9,
-	                "agreeableness": 0.9,
-	                "openness": 0.9,
-	                "conscientiousness": 0.9,
-	                "neuroticism": 0.9
-	            }
+					"eco": 0.5,
+					"cult": 0.5
+				},
+				"age": 24,
+				"location": {
+					"lat": 33.3597,
+					"lon": 33.758
+				},
+				"gender": "M",
+				"personality": {
+					"extraversion": 0.9,
+					"agreeableness": 0.9,
+					"openness": 0.9,
+					"conscientiousness": 0.9,
+					"neuroticism": 0.9
+				}
 			}, 
 			'user_prefs': {
 				'age': {'min_age': 18, 'max_age': 27, 'optimal_age': 25},
@@ -576,22 +594,22 @@ class UserApiTestCase(TestCase):
 				'languages': None,
 				'interests': ['.net', '3d-modeling', '3d-printing'],
 				"polit_coordinates": {
-	                "eco": 0.5,
-	                "cult": 0.5
-	            },
-	            "age": 24,
-	            "location": {
-	                "lat": 33.3597,
-	                "lon": 33.758
-	            },
-	            "gender": "M",
-	            "personality": {
-	                "extraversion": 0.9,
-	                "agreeableness": 0.9,
-	                "openness": 0.9,
-	                "conscientiousness": 0.9,
-	                "neuroticism": 0.9
-	            }
+					"eco": 0.5,
+					"cult": 0.5
+				},
+				"age": 24,
+				"location": {
+					"lat": 33.3597,
+					"lon": 33.758
+				},
+				"gender": "M",
+				"personality": {
+					"extraversion": 0.9,
+					"agreeableness": 0.9,
+					"openness": 0.9,
+					"conscientiousness": 0.9,
+					"neuroticism": 0.9
+				}
 			}, 
 			'user_prefs': {
 				'age': {'min_age': 18, 'max_age': 27, 'optimal_age': 25},
@@ -620,22 +638,22 @@ class UserApiTestCase(TestCase):
 				'languages': None,
 				'interests': ['.net', '3d-modeling', '3d-printing'],
 				"polit_coordinates": {
-	                "eco": 0,
-	                "cult": 0
-	            },
-	            "age": 24,
-	            "location": {
-	                "lat": 0,
-	                "lon": 0
-	            },
-	            "gender": "F",
-	            "personality": {
-	                "extraversion": 0.5,
-	                "agreeableness": 0.5,
-	                "openness": 0.5,
-	                "conscientiousness": 0.5,
-	                "neuroticism": 0.5
-	            }
+					"eco": 0,
+					"cult": 0
+				},
+				"age": 24,
+				"location": {
+					"lat": 0,
+					"lon": 0
+				},
+				"gender": "F",
+				"personality": {
+					"extraversion": 0.5,
+					"agreeableness": 0.5,
+					"openness": 0.5,
+					"conscientiousness": 0.5,
+					"neuroticism": 0.5
+				}
 			}, 
 			'user_prefs': {
 				'age': {'min_age': 24, 'max_age': 28, 'optimal_age': 25},
@@ -694,6 +712,52 @@ class UserRegistrationTestCase(TestCase):
 		self.assertEqual(response.status_code, 400)
 		self.assertEqual(response.json()['user']['non_field_errors'][0], 'A user with this email already exists.')
 
+class SearchAlgorithmTestCase(TestCase):
+	def setUp(self):
+		self.first_user = create_empty_user()
+		self.first_user.user_info.interests = ['music', 'reading', 'hiking', 'art', 'philosophy']
+		self.first_user.user_info.location = GeoCoordinates.objects.create(lat=55.751244, lon=37.618423)
+		self.first_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0.2, cult=0)
+		self.first_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.4, openness=0.8, conscientiousness=0.7, neuroticism=0.8)
+		self.first_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+		self.first_user.user_prefs.polit = True
+		self.first_user.user_prefs.interests = True
+		self.first_user.user_prefs.location = True
+		self.first_user.user_prefs.personality = True
+		self.first_user.user_prefs.goals = ChatGoal.ROMANTIC
+		self.first_user.user_prefs.gender = Gender.FEMALE
+		self.first_user.status = 'Searching'
+		self.first_user.save()
+		for i in range(10):
+			test_user = create_empty_user()
+			test_user.user_info.interests = ['music', 'reading', 'hiking', 'art', 'philosophy']
+			test_user.user_info.location = GeoCoordinates.objects.create(lat=55.751244, lon=37.618423)
+			test_user.user_info.polit_coordinates=PolitCoordinates.objects.create(eco=0.2, cult=0)
+			test_user.user_info.personality=Personality.objects.create(extraversion=0.4, agreeableness=0.4, openness=0.8, conscientiousness=0.7, neuroticism=0.8)
+			test_user.user_prefs.age = AgePref.objects.create(min_age=23, max_age=28, optimal_age=25)
+			test_user.user_prefs.polit = True
+			test_user.user_prefs.interests = True
+			test_user.user_prefs.location = True
+			test_user.user_prefs.personality = True
+			test_user.user_prefs.goals = ChatGoal.ROMANTIC
+			test_user.user_prefs.gender = Gender.FEMALE
+			test_user.status = 'Searching'
+			test_user.save()
+			if i%2 == 0:
+				self.first_user.ignored_users.add(test_user)
+	@timeit
+	def test_find_most_like_minded(self):
+		best_user = ChatSearchConsumer.find_room(None, self.first_user.id)
+		'''
+		Initial result: 130 ms
+		Updating potential users query:
+		After adding .select_related('user_info'): 115 ms
+		After adding .select_related('user_prefs): 100 ms
+		Updating main user query:
+		After adding .prefetch_related('ignored_users'): 84 ms
+		After adding .prefetch_related('usersIgnoredBy'): 79 ms
+		'''
+
 
 '''
 class ChattingTest(TestCase):
@@ -713,10 +777,10 @@ class ChattingTest(TestCase):
 		connected, subprotocol = await communicator.connect()
 		assert connected
 		await communicator.send_to(json.dumps({
-              "type": "message",
-              "message": "Start searching",
-              "name": "name"
-            }))
+			  "type": "message",
+			  "message": "Start searching",
+			  "name": "name"
+			}))
 		# response = await communicator.receive_from()
 		# assert response == "hello"
 		# # Close
