@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'channels',
+    'stats',
 ]
 
 REST_FRAMEWORK = {
@@ -218,3 +219,5 @@ CSP_IMG_SRC = ("'self unsafe-inline'",)
 CSP_FONT_SRC = ("'self unsafe-inline'",)
 
 CORS_ALLOW_CREDENTIALS = True
+
+CELERY_BROKER_URL = 'amqp://localhost'

@@ -8,6 +8,9 @@ from django.contrib.auth.models import User as RealUser
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness, AcceptanceCalculator, LikenessCalculator
 import time
 import threading
+from chat.tools.statistics_tools import wrap_chat_stats
+
+
 
 class ChatSearchConsumer(WebsocketConsumer):
     def connect(self):
@@ -41,7 +44,7 @@ class ChatSearchConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
+    @wrap_chat_stats()
     def find_room(self, user_id):
         print("Start search for user " + str(user_id))
         user = User.objects.filter(pk=int(user_id)).prefetch_related('ignored_users').prefetch_related('usersIgnoredBy').get()
