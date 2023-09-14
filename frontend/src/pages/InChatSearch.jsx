@@ -468,7 +468,7 @@ class InChatSearch extends Component {
             if (dataFromServer) {
               let room = dataFromServer.message;
               this.setState({ room: room });
-              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
+              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + user.custom_user_id + '/');
               this.client.onopen = () => {
                 // this.client.send(JSON.stringify({
                 //   type: "possible_unblind",
@@ -481,8 +481,8 @@ class InChatSearch extends Component {
                 const dataFromServer = JSON.parse(message.data);
                 if (dataFromServer) {
                   if (dataFromServer.type === 'exit_message') {
+                    this.client.close();
                     this.setState({ status: 'ended' });
-
                   }
                   else if (dataFromServer.type === 'possible_unblind'){
                     if (dataFromServer.message.toString() !== user.custom_user_id.toString()){

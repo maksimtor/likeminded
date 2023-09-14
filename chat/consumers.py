@@ -8,8 +8,8 @@ from django.contrib.auth.models import User as RealUser
 from chat.tools.prefAlgorithm import calcAcceptance, calcLikeness, AcceptanceCalculator, LikenessCalculator
 import time
 import threading
-from chat.tools.statistics_tools import wrap_chat_stats
-
+from chat.tools.statistics_tools import wrap_chat_stats, wrap_chat_stats_update_time
+import time
 
 
 class ChatSearchConsumer(WebsocketConsumer):
@@ -44,6 +44,7 @@ class ChatSearchConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
     @wrap_chat_stats()
     def find_room(self, user_id):
         print("Start search for user " + str(user_id))
@@ -85,17 +86,18 @@ class ChatSearchConsumer(WebsocketConsumer):
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.room_group_name = 'chat_%s' % self.room_name
-
+        self.start_session_time = time.perf_counter()
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
         )
-
         self.accept()
 
+    @wrap_chat_stats_update_time
     def disconnect(self, close_code):
-        chats = Chat.objects.filter(id=self.room_name).delete()
+        Chat.objects.filter(id=self.room_name).delete()
         self.send(text_data=json.dumps({
             'message': '',
             'name': '',
@@ -111,6 +113,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        return (self.user_id, self.start_session_time)
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)

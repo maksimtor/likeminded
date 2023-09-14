@@ -463,7 +463,7 @@ class Chatsearch extends Component {
             if (dataFromServer) {
               let room = dataFromServer.message;
               this.setState({ room: room });
-              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
+              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + text.id + '/');
               this.client.onopen = () => {
                 console.log('WebSocket Client Connected');
               };
@@ -473,6 +473,7 @@ class Chatsearch extends Component {
                 console.log('got reply! ', dataFromServer.type);
                 if (dataFromServer) {
                   if (dataFromServer.type === 'exit_message') {
+                    this.client.close();
                     this.setState({ isLoggedIn: false });
                     this.setState({ status: 'ended' });
                   } else {
