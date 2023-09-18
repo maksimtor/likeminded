@@ -1,51 +1,22 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import console from "react-console";
-import Select from 'react-select'
-import ToggleButton from 'react-toggle-button'
 import languages from 'countries-list';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-// import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
-import Slider from '@material-ui/core/Slider';
 
 import { withStyles } from "@material-ui/core/styles";
 
 import AuthContext from '../context/AuthContext'
 import { FreeButton as CustomButton } from '../components/FreeButton';
-import { CustomLink } from '../components/CustomLink';
 
 const useStyles = theme => ({
-  // paper: {
-  //   marginTop: theme.spacing(8),
-  //   display: 'flex',
-  //   flexDirection: 'column',
-  //   alignItems: 'center',
-  // },
-  // avatar: {
-  //   margin: theme.spacing(1),
-  //   backgroundColor: theme.palette.secondary.main,
-  // },
-  // form: {
-  //   width: '100%', // Fix IE 11 issue.
-  //   marginTop: theme.spacing(1),
-  // },
-  // submit: {
-  //   margin: theme.spacing(3, 0, 2),
-  // },
-  // root: {
-  //   boxShadow: 'none',
-  // },
   paper: {
     padding: '150px 0',
     textAlign: 'center',
@@ -54,18 +25,6 @@ const useStyles = theme => ({
     textAlign: 'center',
   }
 });
-
-const genders = [
-  { value: 'M', label: 'Male' },
-  { value: 'F', label: 'Female' },
-  { value: 'A', label: 'Other/Anything' }
-]
-
-const goals = [
-  { value: 'FR', label: 'Friendship' },
-  { value: 'RO', label: 'Romantic' },
-  { value: 'AN', label: 'Anything' }
-]
 
 const interests = [
   ".net",
@@ -341,12 +300,9 @@ for (const i in interests) {
   console.log("hi")
 }
 
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
 
 class InChatSearch extends Component {
-     static contextType = AuthContext
+  static contextType = AuthContext
 
   state = {
     isLoggedIn: false,
@@ -394,7 +350,7 @@ class InChatSearch extends Component {
       message: this.state.value,
       name: user.custom_user_id
     }));
-    this.state.value = ''
+    this.setState({value: ''})
     e.preventDefault();
   }
   ignoreUser = async(e) => {
@@ -418,7 +374,7 @@ class InChatSearch extends Component {
       message: user.custom_user_id,
       name: 'name'
     }));
-    this.state.unblindRequestSent = true;
+    this.setState({unblindRequestSent: true})
     e.preventDefault();
   }
 
@@ -429,7 +385,7 @@ class InChatSearch extends Component {
       message: user.custom_user_id,
       name: 'name'
     }));
-    this.state.unblinded = true;
+    this.setState({unblinded: true})
     e.preventDefault();
   }
 
@@ -470,12 +426,7 @@ class InChatSearch extends Component {
               this.setState({ room: room });
               this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + user.custom_user_id + '/');
               this.client.onopen = () => {
-                // this.client.send(JSON.stringify({
-                //   type: "possible_unblind",
-                //   message: user.custom_user_id,
-                //   name: "name"
-                // }));
-              this.setState({ status: 'chatting' })
+                this.setState({ status: 'chatting' })
               };
               this.client.onmessage = (message) => {
                 const dataFromServer = JSON.parse(message.data);

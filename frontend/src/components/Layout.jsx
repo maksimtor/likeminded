@@ -2,7 +2,6 @@ import { Outlet } from 'react-router-dom';
 import { CustomLink } from './CustomLink';
 import { useContext, useState, useEffect  } from 'react'
 import AuthContext from '../context/AuthContext';
-import Button from '@material-ui/core/Button';
 import { Button as CustomButton } from './Button';
 
 const Layout = () => {

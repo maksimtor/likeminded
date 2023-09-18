@@ -4,7 +4,7 @@ import AuthContext from '../context/AuthContext';
 
 const RequireAuth = ({children}) => {
     const location = useLocation();
-    let {user, logoutUser} = useContext(AuthContext)
+    let { user } = useContext(AuthContext)
 
     if (!user) {
         return <Navigate to='/login' state={{from: location}} />

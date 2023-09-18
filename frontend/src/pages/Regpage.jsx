@@ -1,22 +1,11 @@
 import React, { Component } from 'react';
-import console from "react-console";
-import Select from 'react-select'
-import ToggleButton from 'react-toggle-button'
-import languages from 'countries-list';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import Paper from '@material-ui/core/Paper';
-import Avatar from '@material-ui/core/Avatar';
-import Slider from '@material-ui/core/Slider';
 
 import { withStyles } from "@material-ui/core/styles";
 import AuthContext from '../context/AuthContext'
@@ -43,11 +32,6 @@ const useStyles = theme => ({
   }
 });
 
-
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-
 class Regpage extends Component {
     static contextType = AuthContext
     state = {
@@ -60,13 +44,11 @@ class Regpage extends Component {
     }
 
     handleValidation = async(e) =>  {
-        let formIsValid = true;
         let copyErrors = {}
         this.setState({ errors: {}});
 
         //Name
         if (!this.state.username) {
-          formIsValid = false;
           copyErrors.username = "Cannot be empty";
         }
         if (typeof this.state.email !== "undefined") {
@@ -77,23 +59,20 @@ class Regpage extends Component {
             !(
               lastAtPos < lastDotPos &&
               lastAtPos > 0 &&
-              this.state.email.indexOf("@@") == -1 &&
+              this.state.email.indexOf("@@") === -1 &&
               lastDotPos > 2 &&
               this.state.email.length - lastDotPos > 2
             )
           ) {
-            formIsValid = false;
             copyErrors.email = "Email is not valid";
           }
         }
         if (!this.state.email) {
-          formIsValid = false;
           copyErrors.email = "Cannot be empty";
         }
 
         //Name
         if (!this.state.password) {
-          formIsValid = false;
           copyErrors.password = "Cannot be empty";
         }
         this.setState({ errors: copyErrors});
@@ -116,47 +95,7 @@ class Regpage extends Component {
                               alert(JSON.stringify(text['user']['non_field_errors']))
                             }
                         }));
-
-
-        // //Email
-        // if (!fields["email"]) {
-        //   formIsValid = false;
-        //   errors["email"] = "Cannot be empty";
-        // }
-
-        // if (typeof fields["email"] !== "undefined") {
-        //   let lastAtPos = fields["email"].lastIndexOf("@");
-        //   let lastDotPos = fields["email"].lastIndexOf(".");
-
-        //   if (
-        //     !(
-        //       lastAtPos < lastDotPos &&
-        //       lastAtPos > 0 &&
-        //       fields["email"].indexOf("@@") == -1 &&
-        //       lastDotPos > 2 &&
-        //       fields["email"].length - lastDotPos > 2
-        //     )
-        //   ) {
-        //     formIsValid = false;
-        //     errors["email"] = "Email is not valid";
-        //   }
-        // }
     }
-
-  register = (e) => {
-    // TODO: validation
-    // TODO: creating new user
-    // TODO: if success, log in and send user to profile page
-    // if (this.handleValidation()) {
-    //   alert("Form submitted");
-    // } else {
-    //   alert(this.handleValidation())
-    //   alert("Form has errors.");
-    // }
-
-    // e.preventDefault();
-  }
-
 
   componentDidMount() {
   }

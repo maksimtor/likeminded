@@ -1,16 +1,11 @@
-import React, { Component, useContext } from 'react';
+import React, { Component } from 'react';
 import console from "react-console";
 import Select from 'react-select'
 import ToggleButton from 'react-toggle-button'
 import languages from 'countries-list';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -332,10 +327,6 @@ for (const i in interests) {
   console.log("hi")
 }
 
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-
 class Profile extends Component {
 
   static contextType = AuthContext
@@ -406,7 +397,7 @@ class Profile extends Component {
       message: this.state.value,
       name: this.state.name
     }));
-    this.state.value = ''
+    this.setState({ value: '' });
     e.preventDefault();
   }
 
@@ -425,22 +416,10 @@ class Profile extends Component {
     const {user, authTokens, csrfTokens} =this.context;
     var state = this.state
     state['user_id'] = user.user_id
-    // alert(csrfTokens.csrfToken)
-    // fetch('http://localhost:8000/chat/update_profile/', {
-    //   method: 'POST', // или 'PUT'
-    //   body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-    //     .then(response => response.json().then((text) => {
-
-    //     }));
     state['user_info']['gender'] = this.state.user_info.gender.value;
     state['user_prefs']['goals'] = this.state.user_prefs.goals.value;
     state['user_prefs']['gender'] = this.state.user_prefs.gender.value;
     state['user_info']['description'] = 'Hi';
-    var keys = Object.keys(this.state.user_info.interests);
     var int_values = [];
     for (var key in state.user_info.interests){
       int_values.push(state.user_info.interests[key].value);
@@ -480,9 +459,6 @@ class Profile extends Component {
         })
   };
 
-
-
-
   componentDidMount() {
     const {user, authTokens} =this.context;
     fetch('http://localhost:8000/chat/api/users/' + user.custom_user_id + '/', {
@@ -496,7 +472,8 @@ class Profile extends Component {
         .then(response => response.json().then((text) => {
           let gender = text.user_info.gender;
           var gender_reformed;
-          for (var i in genders){
+          var i;
+          for (i in genders){
             if (genders[i].value === gender){
               gender_reformed = genders[i];
               text.user_info.gender = gender_reformed;
@@ -506,13 +483,13 @@ class Profile extends Component {
 
           let interests_db = text.user_info.interests;
           var interests_reformed = [];
-          for (var i in interests_db){
+          for (i in interests_db){
             interests_reformed.push({value: interests_db[i], label:interests_db[i]})
           }
           text.user_info.interests = interests_reformed;
           let goals_db = text.user_prefs.goals;
           var goals_reformed;
-          for (var i in goals){
+          for (i in goals){
             if (goals[i].value === goals_db){
               goals_reformed = goals[i];
               text.user_prefs.goals = goals_reformed;
@@ -522,7 +499,7 @@ class Profile extends Component {
 
           let gender_pref = text.user_prefs.gender;
           var gender_pref_reformed;
-          for (var i in genders){
+          for (i in genders){
             if (genders[i].value === gender_pref){
               gender_pref_reformed = genders[i];
               text.user_prefs.gender = gender_pref_reformed;

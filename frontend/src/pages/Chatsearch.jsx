@@ -6,7 +6,6 @@ import languages from 'countries-list';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
@@ -330,10 +329,6 @@ for (const i in interests) {
   console.log("hi")
 }
 
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-
 class Chatsearch extends Component {
     static contextType = AuthContext
 
@@ -393,15 +388,13 @@ class Chatsearch extends Component {
     }
   }
 
-  // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
-
   onButtonClicked = (e) => {
     this.client.send(JSON.stringify({
       type: "chat_message",
       message: this.state.value,
       name: this.state.name
     }));
-    this.state.value = ''
+    this.setState({value: ''})
     e.preventDefault();
   }
 
@@ -426,15 +419,12 @@ class Chatsearch extends Component {
   }
 
   enterRoom = async(e) => {
-    const {csrfTokens} =this.context;
     this.setState({status: 'searching'});
-    var json_data = {'name': this.state.name};
     var state = JSON.parse(JSON.stringify(this.state));
     state['registration'] = false;
     state['user_info']['gender'] = this.state.user_info.gender.value;
     state['user_prefs']['goals'] = this.state.user_prefs.goals.value;
     state['user_prefs']['gender'] = this.state.user_prefs.gender.value;
-    var keys = Object.keys(this.state.user_info.interests);
     var int_values = [];
     for (var key in state.user_info.interests){
       int_values.push(state.user_info.interests[key].value);
@@ -501,7 +491,8 @@ class Chatsearch extends Component {
     if (localStorage.getItem('user')) {
           let gender = this.userData.user_info.gender;
           var gender_reformed;
-          for (var i in genders){
+          var i;
+          for (i in genders){
             if (genders[i].value === gender){
               gender_reformed = genders[i];
               this.userData.user_info.gender = gender_reformed;
@@ -509,15 +500,9 @@ class Chatsearch extends Component {
             }
           }
 
-          // let interests_db = this.userData.user_info.interests;
-          // var interests_reformed = [];
-          // for (var i in interests_db){
-          //   interests_reformed.push({value: interests_db[i], label:interests_db[i]})
-          // }
-          // this.userData.user_info.interests = interests_reformed;
           let goals_db = this.userData.user_prefs.goals;
           var goals_reformed;
-          for (var i in goals){
+          for (i in goals){
             if (goals[i].value === goals_db){
               goals_reformed = goals[i];
               this.userData.user_prefs.goals = goals_reformed;
@@ -527,7 +512,7 @@ class Chatsearch extends Component {
 
           let gender_pref = this.userData.user_prefs.gender;
           var gender_pref_reformed;
-          for (var i in genders){
+          for (i in genders){
             if (genders[i].value === gender_pref){
               gender_pref_reformed = genders[i];
               this.userData.user_prefs.gender = gender_pref_reformed;
