@@ -16,7 +16,7 @@ import { withStyles } from "@material-ui/core/styles";
 import AuthContext from '../context/AuthContext'
 import { FreeButton as CustomButton } from '../components/FreeButton';
 
-const useStyles = theme => ({
+const useStyles = () => ({
   paper: {
     padding: '150px 0',
     textAlign: 'center',
@@ -277,26 +277,26 @@ let areas_select = [];
 
 for (const [key, value] of Object.entries(languages.languages)) {
   // languages_select.push({value: l.key, label: l.name})
-  languages_select.push({value: key, label:value.name})
+  languages_select.push({ value: key, label: value.name })
   console.log("hi")
 }
 
 for (const [key, value] of Object.entries(languages.continents)) {
   // languages_select.push({value: l.key, label: l.name})
-  areas_select.push({value: key, label:value})
+  areas_select.push({ value: key, label: value })
   console.log("hi")
 }
 
 for (const [key, value] of Object.entries(languages.countries)) {
   // languages_select.push({value: l.key, label: l.name})
-  countries_select.push({value: key, label:value.name})
-  areas_select.push({value: key, label:value.name})
+  countries_select.push({ value: key, label: value.name })
+  areas_select.push({ value: key, label: value.name })
   console.log("hi")
 }
 
 for (const i in interests) {
   // languages_select.push({value: l.key, label: l.name})
-  interests_select.push({value: interests[i], label:interests[i]})
+  interests_select.push({ value: interests[i], label: interests[i] })
   console.log("hi")
 }
 
@@ -330,12 +330,12 @@ class InChatSearch extends Component {
     locPref: false,
     areaPref: [],
     persPref: false,
-    goals:'',
+    goals: '',
     genderPref: '',
-    ageRange:[1,100],
+    ageRange: [1, 100],
     ageOptimal: 25,
     canUnblind: false,              // get data from api if partner is registered
-    unblindRequestSent: false,      
+    unblindRequestSent: false,
     unblindRequestReceived: false,
     unblinded: false,
     status: 'prepare',
@@ -344,48 +344,48 @@ class InChatSearch extends Component {
   // client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/');
 
   onButtonClicked = (e) => {
-    const {user} =this.context;
+    const { user } = this.context;
     this.client.send(JSON.stringify({
       type: "chat_message",
       message: this.state.value,
       name: user.custom_user_id
     }));
-    this.setState({value: ''})
+    this.setState({ value: '' })
     e.preventDefault();
   }
-  ignoreUser = async(e) => {
-    const {user} =this.context;
-                        fetch('http://localhost:8000/chat/ignore_user/', {
-                          method: 'POST', // или 'PUT'
-                          body: JSON.stringify({user1: user.custom_user_id, user2: e.friend_id}), // данные могут быть 'строкой' или {объектом}!
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        })
-                            .then(response => response.json().then((text) => {
-                                alert(text.result);
-                            }));
+  ignoreUser = async (e) => {
+    const { user } = this.context;
+    fetch('http://localhost:8000/chat/ignore_user/', {
+      method: 'POST', // или 'PUT'
+      body: JSON.stringify({ user1: user.custom_user_id, user2: e.friend_id }), // данные могут быть 'строкой' или {объектом}!
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => response.json().then((text) => {
+        alert(text.result);
+      }));
   }
 
   sendUnblindRequest = (e) => {
-    const {user} =this.context;
+    const { user } = this.context;
     this.client.send(JSON.stringify({
       type: "unblind_request",
       message: user.custom_user_id,
       name: 'name'
     }));
-    this.setState({unblindRequestSent: true})
+    this.setState({ unblindRequestSent: true })
     e.preventDefault();
   }
 
   approveUnblindRequest = (e) => {
-    const {user} =this.context;
+    const { user } = this.context;
     this.client.send(JSON.stringify({
       type: "approve_request",
       message: user.custom_user_id,
       name: 'name'
     }));
-    this.setState({unblinded: true})
+    this.setState({ unblinded: true })
     e.preventDefault();
   }
 
@@ -394,164 +394,139 @@ class InChatSearch extends Component {
     this.setState({ geoLon: pos.coords.longitude });
   }
 
-  endChat = (e) => {
+  endChat = () => {
     this.client.close();
     this.setState({ status: 'ended' });
   }
 
   stopSearch = (e) => {
-    this.setState( {status: 'prepare'});
+    this.setState({ status: 'prepare' });
     this.searchClient.close();
     e.preventDefault();
   }
 
 
-  enterRoom = async(e) => {
-          this.setState({status: 'searching'});
-          const {user} = this.context;
-          let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + user.custom_user_id + '/');
-          this.searchClient = client;
-          client.onopen = function(e) {
-            client.send(JSON.stringify({
-              type: "message",
-              message: 'Start searching',
-              name: "name"
-            }));
-          };
-          client.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            console.log('got reply! ', dataFromServer.type);
-            if (dataFromServer) {
-              let room = dataFromServer.message;
-              this.setState({ room: room });
-              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + user.custom_user_id + '/');
-              this.client.onopen = () => {
-                this.setState({ status: 'chatting' })
-              };
-              this.client.onmessage = (message) => {
-                const dataFromServer = JSON.parse(message.data);
-                if (dataFromServer) {
-                  if (dataFromServer.type === 'exit_message') {
-                    this.client.close();
-                    this.setState({ status: 'ended' });
-                  }
-                  else if (dataFromServer.type === 'possible_unblind'){
-                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
-                      this.setState({ canUnblind: true })
-                      this.setState({ talkingWith: dataFromServer.message})
-                        fetch('http://localhost:8000/chat/create_historical_chat/', {
-                          method: 'POST', // или 'PUT'
-                          body: JSON.stringify({user1: user.custom_user_id, user2: dataFromServer.message}), // данные могут быть 'строкой' или {объектом}!
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        })
-                            .then(response => response.json().then((text) => {
-                                
-                            }));
-                    }
-                  }
-                  else if (dataFromServer.type === 'unblind_request'){
-                    this.setState({ canUnblind: false })
-                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
-                      this.setState({ unblindRequestReceived: true });
-                    }
-                  }
-                  else if (dataFromServer.type === 'approve_request'){
-                    this.setState({ canUnblind: false })
-                    this.setState({unblindRequestReceived: false})
-                    if (dataFromServer.message.toString() !== user.custom_user_id.toString()){
-                        fetch('http://localhost:8000/chat/create_chat_room/', {
-                          method: 'POST', // или 'PUT'
-                          body: JSON.stringify({user1: user.custom_user_id, user2: dataFromServer.message}), // данные могут быть 'строкой' или {объектом}!
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        })
-                            .then(response => response.json().then((text) => {
-                                this.setState({ unblinded: true })
-                            }));
-                    }
-                  }
-                  else {
-                    this.setState((state) =>
-                      ({
-                        messages: [...state.messages,
-                        {
-                          msg: dataFromServer.message,
-                          name: dataFromServer.name
-                        }]
-                      })
-                    );
-                  }
-                  
-                }
-              };
-              this.setState({ isLoggedIn: true });
+  enterRoom = async () => {
+    this.setState({ status: 'searching' });
+    const { user } = this.context;
+    let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + user.custom_user_id + '/');
+    this.searchClient = client;
+    client.onopen = function () {
+      client.send(JSON.stringify({
+        type: "message",
+        message: 'Start searching',
+        name: "name"
+      }));
+    };
+    client.onmessage = (message) => {
+      const dataFromServer = JSON.parse(message.data);
+      console.log('got reply! ', dataFromServer.type);
+      if (dataFromServer) {
+        let room = dataFromServer.message;
+        this.setState({ room: room });
+        this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + user.custom_user_id + '/');
+        this.client.onopen = () => {
+          this.setState({ status: 'chatting' })
+        };
+        this.client.onmessage = (message) => {
+          const dataFromServer = JSON.parse(message.data);
+          if (dataFromServer) {
+            if (dataFromServer.type === 'exit_message') {
+              this.client.close();
+              this.setState({ status: 'ended' });
             }
-          };
+            else if (dataFromServer.type === 'possible_unblind') {
+              if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
+                this.setState({ canUnblind: true })
+                this.setState({ talkingWith: dataFromServer.message })
+                fetch('http://localhost:8000/chat/create_historical_chat/', {
+                  method: 'POST', // или 'PUT'
+                  body: JSON.stringify({ user1: user.custom_user_id, user2: dataFromServer.message }), // данные могут быть 'строкой' или {объектом}!
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
+                  .then(response => response.json().then(() => {
+
+                  }));
+              }
+            }
+            else if (dataFromServer.type === 'unblind_request') {
+              this.setState({ canUnblind: false })
+              if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
+                this.setState({ unblindRequestReceived: true });
+              }
+            }
+            else if (dataFromServer.type === 'approve_request') {
+              this.setState({ canUnblind: false })
+              this.setState({ unblindRequestReceived: false })
+              if (dataFromServer.message.toString() !== user.custom_user_id.toString()) {
+                fetch('http://localhost:8000/chat/create_chat_room/', {
+                  method: 'POST', // или 'PUT'
+                  body: JSON.stringify({ user1: user.custom_user_id, user2: dataFromServer.message }), // данные могут быть 'строкой' или {объектом}!
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
+                  .then(response => response.json().then(() => {
+                    this.setState({ unblinded: true })
+                  }));
+              }
+            }
+            else {
+              this.setState((state) =>
+              ({
+                messages: [...state.messages,
+                {
+                  msg: dataFromServer.message,
+                  name: dataFromServer.name
+                }]
+              })
+              );
+            }
+
+          }
+        };
+        this.setState({ isLoggedIn: true });
+      }
+    };
   }
 
   componentDidMount() {
     this.userData = JSON.parse(localStorage.getItem('user'));
     if (localStorage.getItem('user')) {
-        this.setState({
-          name: this.userData.name,
-          age: this.userData.age,
-          gender: this.userData.gender,
-          languages: this.userData.languages,
-          interests: this.userData.interests,
-          country: this.userData.country,
-          locToggle: this.userData.locToggle,
-          geoLat: this.userData.geoLat,
-          geoLon: this.userData.geoLon,
-          polEco: this.userData.polEco,
-          polGov: this.userData.polGov,
-          personalityExtraversion: this.userData.personalityExtraversion,
-          personalityAgreeableness: this.userData.personalityAgreeableness,
-          personalityOpenness: this.userData.personalityOpenness,
-          personalityConscientiousness: this.userData.personalityConscientiousness,
-          personalityNeuroticism: this.userData.personalityNeuroticism,
-          politPref: this.userData.politPref,
-          intPref: this.userData.intPref,
-          locPref: this.userData.locPref,
-          areaPref: this.userData.areaPref,
-          persPref: this.userData.persPref,
-          goals: this.userData.goals,
-          genderPref: this.userData.genderPref,
-          ageRange: this.userData.ageRange,
-          ageOptimal: this.userData.ageOptimal
-        })
+      this.setState({
+        name: this.userData.name,
+        age: this.userData.age,
+        gender: this.userData.gender,
+        languages: this.userData.languages,
+        interests: this.userData.interests,
+        country: this.userData.country,
+        locToggle: this.userData.locToggle,
+        geoLat: this.userData.geoLat,
+        geoLon: this.userData.geoLon,
+        polEco: this.userData.polEco,
+        polGov: this.userData.polGov,
+        personalityExtraversion: this.userData.personalityExtraversion,
+        personalityAgreeableness: this.userData.personalityAgreeableness,
+        personalityOpenness: this.userData.personalityOpenness,
+        personalityConscientiousness: this.userData.personalityConscientiousness,
+        personalityNeuroticism: this.userData.personalityNeuroticism,
+        politPref: this.userData.politPref,
+        intPref: this.userData.intPref,
+        locPref: this.userData.locPref,
+        areaPref: this.userData.areaPref,
+        persPref: this.userData.persPref,
+        goals: this.userData.goals,
+        genderPref: this.userData.genderPref,
+        ageRange: this.userData.ageRange,
+        ageOptimal: this.userData.ageOptimal
+      })
     }
-      // this.client.onopen = () => {
-      //   console.log('WebSocket Client Connected');
-      // };
-      // this.client.onmessage = (message) => {
-      //   const dataFromServer = JSON.parse(message.data);
-      //   console.log('got reply! ', dataFromServer.type);
-      //   if (dataFromServer) {
-      //     this.setState((state) =>
-      //       ({
-      //         messages: [...state.messages,
-      //         {
-      //           msg: dataFromServer.message,
-      //           name: dataFromServer.name,
-      //         }]
-      //       })
-      //     );
-      //   }
-      // };
-    
-  }
-  
-  componentWillUpdate(nextProps, nextState) {
-    // localStorage.setItem('user', JSON.stringify(nextState));
-  }
 
-
+  }
 
   render() {
-    // window.navigator.geolocation.getCurrentPosition(this.success, this.success);
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs">
@@ -574,44 +549,44 @@ class InChatSearch extends Component {
               </>)}
             </Paper>
 
-            { this.state.status === 'ended' ?
+            {this.state.status === 'ended' ?
 
-            <div>
-            <div className={classes.chatEnd}>
-            <div className='ended-div'>Chat ended!</div>
-                <CustomButton
-                  onClick={this.enterRoom}
-                  type="button"
-                  buttonStyle='btn--nrm'
-                  buttonSize='btn--large'
-                >
-                  Start Chatting Again!
+              <div>
+                <div className={classes.chatEnd}>
+                  <div className='ended-div'>Chat ended!</div>
+                  <CustomButton
+                    onClick={this.enterRoom}
+                    type="button"
+                    buttonStyle='btn--nrm'
+                    buttonSize='btn--large'
+                  >
+                    Start Chatting Again!
                   </CustomButton>
-                  </div>
-            </div>
-            :
-            <div>
-            <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
-              <TextField
-                id="outlined-helperText"
-                label="Make a comment"
-                defaultValue="Default Value"
-                variant="outlined"
-                value={this.state.value}
-                fullWidth
-                onChange={e => {
-                  this.setState({ value: e.target.value });
-                  this.value = this.state.value;
-                }}
-              />
-              <CustomButton
-                type="submit"
-                  buttonStyle='btn--nrm'
-                  buttonSize='btn--large'
-              >
-                Search again
-                </CustomButton>
-              </form>
+                </div>
+              </div>
+              :
+              <div>
+                <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
+                  <TextField
+                    id="outlined-helperText"
+                    label="Make a comment"
+                    defaultValue="Default Value"
+                    variant="outlined"
+                    value={this.state.value}
+                    fullWidth
+                    onChange={e => {
+                      this.setState({ value: e.target.value });
+                      this.value = this.state.value;
+                    }}
+                  />
+                  <CustomButton
+                    type="submit"
+                    buttonStyle='btn--nrm'
+                    buttonSize='btn--large'
+                  >
+                    Search again
+                  </CustomButton>
+                </form>
                 <CustomButton
                   onClick={this.endChat}
                   type="button"
@@ -619,77 +594,77 @@ class InChatSearch extends Component {
                   buttonSize='btn--large'
                 >
                   End chat!
-                  </CustomButton>
+                </CustomButton>
               </div>}
-              {this.state.canUnblind ?
-                <div>
-              <CustomButton
+            {this.state.canUnblind ?
+              <div>
+                <CustomButton
                   onClick={this.sendUnblindRequest}
                   type="button"
                   buttonStyle='btn--nrm'
                   buttonSize='btn--large'
                 >
                   Unblind
-                  </CustomButton>
-                  <CustomButton
-                                    buttonStyle='btn--nrm'
-                  buttonSize='btn--large'
-                    onClick={e => {
-                      this.ignoreUser({ friend_id: this.state.talkingWith});
-                    }}
-                  >  Ignore
-                  </CustomButton>
-                  </div>
-                :
-                <div></div>
-                }
-
-              {this.state.unblindRequestReceived ?
-              <CustomButton
-                  onClick={this.approveUnblindRequest}
-                  type="button"
+                </CustomButton>
+                <CustomButton
                   buttonStyle='btn--nrm'
                   buttonSize='btn--large'
-                >
-                  Approve
-                  </CustomButton>
-                :
-                <div></div>
-                }
-              {this.state.unblinded ? <div>Unblinded!</div> : <div></div>}
+                  onClick={() => {
+                    this.ignoreUser({ friend_id: this.state.talkingWith });
+                  }}
+                >  Ignore
+                </CustomButton>
+              </div>
+              :
+              <div></div>
+            }
+
+            {this.state.unblindRequestReceived ?
+              <CustomButton
+                onClick={this.approveUnblindRequest}
+                type="button"
+                buttonStyle='btn--nrm'
+                buttonSize='btn--large'
+              >
+                Approve
+              </CustomButton>
+              :
+              <div></div>
+            }
+            {this.state.unblinded ? <div>Unblinded!</div> : <div></div>}
           </div>
 
           : this.state.status === 'prepare' ?
 
-          <div>
-            <div className={classes.paper}>
-              <form noValidate>
-                <CustomButton
-                  onClick={this.enterRoom}
-                  buttonStyle='btn--nrm'
-                  buttonSize='btn--large'
-                  fullWidth
-                >
-                  Naiti sobesednika
+            <div>
+              <div className={classes.paper}>
+                <form noValidate>
+                  <CustomButton
+                    onClick={this.enterRoom}
+                    buttonStyle='btn--nrm'
+                    buttonSize='btn--large'
+                    fullWidth
+                  >
+                    Naiti sobesednika
                   </CustomButton>
-                <div className='or'>or</div>
-                <Link className="mainLink" to="/profile">Izmenit predpochteniya</Link>
-              </form>
+                  <div className='or'>or</div>
+                  <Link className="mainLink" to="/profile">Izmenit predpochteniya</Link>
+                </form>
+              </div>
             </div>
-          </div>
 
-          : this.state.status === 'searching' ?
+            : this.state.status === 'searching' ?
 
-          <div className={classes.paper}><div class="loader"></div>
-                          <CustomButton
+              <div className={classes.paper}><div className="loader"></div>
+                <CustomButton
                   onClick={this.stopSearch}
                   type="button"
                   buttonStyle='btn--nrm'
                   buttonSize='btn--large'
                 >
                   Stop search
-                  </CustomButton></div>
-          : <div></div>}
+                </CustomButton></div>
+              : <div></div>}
       </Container>
     )
 

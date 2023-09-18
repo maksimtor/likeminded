@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import AuthContext from '../context/AuthContext'
-import { withStyles } from "@material-ui/core/styles";import Container from '@material-ui/core/Container';
+import { withStyles } from "@material-ui/core/styles"; import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -8,26 +8,26 @@ import Button from '@material-ui/core/Button';
 
 const useStyles = theme => ({
     paper: {
-      marginTop: theme.spacing(8),
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
+        marginTop: theme.spacing(8),
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
     },
     avatar: {
-      margin: theme.spacing(1),
-      backgroundColor: theme.palette.secondary.main,
+        margin: theme.spacing(1),
+        backgroundColor: theme.palette.secondary.main,
     },
     form: {
-      width: '100%', // Fix IE 11 issue.
-      marginTop: theme.spacing(1),
+        width: '100%', // Fix IE 11 issue.
+        marginTop: theme.spacing(1),
     },
     submit: {
-      margin: theme.spacing(3, 0, 2),
+        margin: theme.spacing(3, 0, 2),
     },
     root: {
-      boxShadow: 'none',
+        boxShadow: 'none',
     }
-  });
+});
 
 class Loginpage extends Component {
     static contextType = AuthContext
@@ -35,9 +35,9 @@ class Loginpage extends Component {
         username: '',
         password: '',
     }
-    render(){
+    render() {
         const { classes } = this.props;
-        const {loginUser} = this.context
+        const { loginUser } = this.context
         return (
             <Container component="main" maxWidth="xs">
                 <div>
@@ -60,7 +60,7 @@ class Loginpage extends Component {
                                     this.setState({ username: e.target.value });
                                     this.value = this.state.username;
                                 }}
-                                />
+                            />
                             <TextField
                                 variant="outlined"
                                 margin="normal"
@@ -75,21 +75,21 @@ class Loginpage extends Component {
                                     this.setState({ password: e.target.value });
                                     this.value = this.state.password;
                                 }}
-                                />
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    color="primary"
-                                    className={classes.submit}
-                                    >
-                                    Log In
-                                </Button>
+                            />
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={classes.submit}
+                            >
+                                Log In
+                            </Button>
                         </form>
                     </div>
                 </div>
             </Container>
-        )        
+        )
     }
 
 }

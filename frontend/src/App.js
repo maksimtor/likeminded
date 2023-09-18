@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
+import React, { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 
 import { Layout } from './components/Layout'
 
@@ -18,29 +18,27 @@ import "./App.css";
 
 
 function App() {
-  if (true){
     return (
       <>
-      <Router>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<RequireAnon><Chatsearch /></RequireAnon>} />
-              <Route path='in_search' element={<RequireAuth><InChatSearch /></RequireAuth>} />
-              <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
-              <Route path='login' element={
-                <RequireAnon>
-                <Loginpage />
-                </RequireAnon>
-              } />
-              <Route path='registration' element={<RequireAnon><Regpage /></RequireAnon>} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </Router>
+        <Router>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<RequireAnon><Chatsearch /></RequireAnon>} />
+                <Route path='in_search' element={<RequireAuth><InChatSearch /></RequireAuth>} />
+                <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
+                <Route path='login' element={
+                  <RequireAnon>
+                    <Loginpage />
+                  </RequireAnon>
+                } />
+                <Route path='registration' element={<RequireAnon><Regpage /></RequireAnon>} />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </Router>
       </>
     );
   }
-}
 
 export default App;

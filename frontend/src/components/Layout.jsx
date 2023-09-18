@@ -1,88 +1,88 @@
 import { Outlet } from 'react-router-dom';
 import { CustomLink } from './CustomLink';
-import { useContext, useState, useEffect  } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import AuthContext from '../context/AuthContext';
 import { Button as CustomButton } from './Button';
 
 const Layout = () => {
-      const [click, setClick] = useState(false);
-    const [button, setButton] = useState(true);
+  const [click, setClick] = useState(false);
+  const [button, setButton] = useState(true);
 
-    const handleClick = () => setClick(!click);
-    const closeMobileMenu = () => setClick(false);
+  const handleClick = () => setClick(!click);
+  const closeMobileMenu = () => setClick(false);
 
-    const showButton = () => {
-        if (window.innerWidth <= 960) {
-          setButton(false);
-        } else {
-          setButton(true);
-        }
-    };
+  const showButton = () => {
+    if (window.innerWidth <= 960) {
+      setButton(false);
+    } else {
+      setButton(true);
+    }
+  };
 
-    useEffect(() => {
-        showButton();
-    }, []);
+  useEffect(() => {
+    showButton();
+  }, []);
 
-    window.addEventListener('resize', showButton);
-    let {user, logoutUser} = useContext(AuthContext)
-    if (user) {
-        return (
-        <>
+  window.addEventListener('resize', showButton);
+  let { user, logoutUser } = useContext(AuthContext)
+  if (user) {
+    return (
+      <>
         <header>
-            <nav className='navbar'>
+          <nav className='navbar'>
             <div className='navbar-container'>
-                <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
-                    TRVL
-                    <i class='fab fa-typo3' />
-                </CustomLink>
+              <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
+                TRVL
+                <i className='fab fa-typo3' />
+              </CustomLink>
               <div className='menu-icon' onClick={handleClick}>
                 <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
               </div>
               <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                 <li className='nav-item'><CustomLink to="/in_search" onClick={closeMobileMenu}>Chat</CustomLink></li>
-               <li className='nav-item'> <CustomLink to="/profile" onClick={closeMobileMenu}>Profile</CustomLink></li>
-               {button && <li className='nav-item'><CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Logout</CustomButton></li>}
-            </ul>
+                <li className='nav-item'> <CustomLink to="/profile" onClick={closeMobileMenu}>Profile</CustomLink></li>
+                {button && <li className='nav-item'><CustomButton buttonStyle='btn--outline' onClick={logoutUser}>Logout</CustomButton></li>}
+              </ul>
             </div>
-            </nav>
+          </nav>
         </header>
 
         <main className="container">
-            <Outlet />
+          <Outlet />
         </main>
 
         <footer className="container">&copy; ReactRouter Tutorials 2021</footer>
-        </>
-        )
-    }
-    else return (
-        <>
-        <header>
-            <nav className='navbar'>
-            <div className='navbar-container'>
-                <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
-                    TRVL
-                    <i class='fab fa-typo3' />
-                </CustomLink>
-              <div className='menu-icon' onClick={handleClick}>
-                <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
-              </div>
-              <ul className={click ? 'nav-menu active' : 'nav-menu'}>
-                <li className='nav-item'><CustomLink to="/" onClick={closeMobileMenu}>Chat</CustomLink></li>
-                <li className='nav-item'> <CustomLink to="/login" onClick={closeMobileMenu}>Log In</CustomLink></li>
-                <li className='nav-item'> <CustomLink to="/registration" onClick={closeMobileMenu}>Registration</CustomLink></li>
-            </ul>
-            </div>
-            </nav>
-        </header>
-
-        <main className="container">
-            <Outlet />
-        </main>
-
-        <footer className="container">&copy; ReactRouter Tutorials 2021</footer>
-        </>
+      </>
     )
+  }
+  else return (
+    <>
+      <header>
+        <nav className='navbar'>
+          <div className='navbar-container'>
+            <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
+              TRVL
+              <i className='fab fa-typo3' />
+            </CustomLink>
+            <div className='menu-icon' onClick={handleClick}>
+              <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+            </div>
+            <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+              <li className='nav-item'><CustomLink to="/" onClick={closeMobileMenu}>Chat</CustomLink></li>
+              <li className='nav-item'> <CustomLink to="/login" onClick={closeMobileMenu}>Log In</CustomLink></li>
+              <li className='nav-item'> <CustomLink to="/registration" onClick={closeMobileMenu}>Registration</CustomLink></li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+
+      <main className="container">
+        <Outlet />
+      </main>
+
+      <footer className="container">&copy; ReactRouter Tutorials 2021</footer>
+    </>
+  )
 }
 
-export {Layout}
+export { Layout }

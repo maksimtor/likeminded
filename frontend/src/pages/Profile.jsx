@@ -412,7 +412,7 @@ class Profile extends Component {
   }
 
 
-  enterRoom = async(e) => {
+  enterRoom = async() => {
     const {user, authTokens, csrfTokens} =this.context;
     var state = this.state
     state['user_id'] = user.user_id
@@ -437,7 +437,7 @@ class Profile extends Component {
       },
       credentials: "include"
     })
-        .then(response => response.json().then((text) => {
+        .then(response => response.json().then(() => {
 
         }));
   }
@@ -455,7 +455,7 @@ class Profile extends Component {
       method: 'POST',
       body: form_data,
     })
-        .then(res => {
+        .then(() => {
         })
   };
 
@@ -543,13 +543,8 @@ class Profile extends Component {
     }));
     
   }
-  
-  componentWillUpdate(nextProps, nextState) {
-    // localStorage.setItem('user', JSON.stringify(nextState));
-  }
 
   render() {
-    // window.navigator.geolocation.getCurrentPosition(this.success, this.success);
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs">
@@ -636,7 +631,7 @@ class Profile extends Component {
                     this.value = this.state.user_info.age;
                   }}
                 />
-                <label for="gender">Gender: </label>
+                <label htmlFor="gender">Gender: </label>
                 <Select
                  value={this.state.user_info.gender}
                  onChange={(value) => {
@@ -648,7 +643,7 @@ class Profile extends Component {
                  id="gender"
                  options={genders}
                 />
-                <label for="inetests">Interests: </label>
+                <label htmlFor="inetests">Interests: </label>
                 <Select
                  value={this.state.user_info.interests}
                  onChange={(value) => {
@@ -671,7 +666,7 @@ class Profile extends Component {
                     // this.setState({locToggle: !value,});
                     if (!this.state.user_info.location) {
                       window.navigator.geolocation.getCurrentPosition(this.success, this.success)
-                    };
+                    }
                   }} />
                 <div>
                 {(() => {
@@ -700,7 +695,7 @@ class Profile extends Component {
                         marks
                         min={-10}
                         max={10}
-                        onChange={(event: any, newValue: any) => {
+                        onChange={(event, newValue) => {
                           let copyInfo = {...this.state.user_info};
                           copyInfo.polit_coordinates.eco = newValue;
                           this.setState({ user_info: copyInfo });
@@ -713,7 +708,7 @@ class Profile extends Component {
                         marks
                         min={-10}
                         max={10}
-                        onChange={(event: any, newValue: any) => {
+                        onChange={(event, newValue) => {
                           let copyInfo = {...this.state.user_info};
                           copyInfo.polit_coordinates.cult = newValue;
                           this.setState({ user_info: copyInfo });
@@ -741,7 +736,7 @@ class Profile extends Component {
                   marks
                   min={0}
                   max={10}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyInfo = {...this.state.user_info};
                     copyInfo.personality.extraversion = newValue;
                     this.setState({ user_info: copyInfo });
@@ -754,7 +749,7 @@ class Profile extends Component {
                   marks
                   min={0}
                   max={10}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyInfo = {...this.state.user_info};
                     copyInfo.personality.agreeableness = newValue;
                     this.setState({ user_info: copyInfo });
@@ -767,7 +762,7 @@ class Profile extends Component {
                   marks
                   min={0}
                   max={10}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyInfo = {...this.state.user_info};
                     copyInfo.personality.openness = newValue;
                     this.setState({ user_info: copyInfo });
@@ -780,7 +775,7 @@ class Profile extends Component {
                   marks
                   min={0}
                   max={10}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyInfo = {...this.state.user_info};
                     copyInfo.personality.conscientiousness = newValue;
                     this.setState({ user_info: copyInfo });
@@ -793,7 +788,7 @@ class Profile extends Component {
                   marks
                   min={0}
                   max={10}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyInfo = {...this.state.user_info};
                     copyInfo.personality.neuroticism = newValue;
                     this.setState({ user_info: copyInfo });
@@ -829,14 +824,14 @@ class Profile extends Component {
                   }} />
                 {this.state.user_prefs.area_restrict ?
                 <div>
-                <label for="areaPref">Restrict area: </label>
+                <label htmlFor="areaPref">Restrict area: </label>
                 <Slider
                   valueLabelDisplay="on"
                   value={this.state.user_prefs.loc_area}
                   step={1}
                   min={0}
                   max={100}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyPrefs = {...this.state.user_prefs};
                     copyPrefs.loc_area = newValue;
                     this.setState({ user_prefs: copyPrefs });
@@ -862,7 +857,7 @@ class Profile extends Component {
                     copyPrefs.personality = !value;
                     this.setState({ user_prefs: copyPrefs });
                   }} />
-                <label for="goals">What are your goals? </label>
+                <label htmlFor="goals">What are your goals? </label>
                 <Select
                  value={this.state.user_prefs.goals}
                  onChange={(value) => {
@@ -874,7 +869,7 @@ class Profile extends Component {
                  id="goals"
                  options={goals}
                 />
-                <label for="goals">Do you care about gender of the person? </label>
+                <label htmlFor="goals">Do you care about gender of the person? </label>
                 <Select
                  value={this.state.user_prefs.gender}
                  onChange={(value) => {
@@ -894,7 +889,7 @@ class Profile extends Component {
                   step={1}
                   min={0}
                   max={100}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyPrefs = {...this.state.user_prefs};
                     copyPrefs.age.min_age = newValue[0];
                     copyPrefs.age.max_age = newValue[1];
@@ -908,7 +903,7 @@ class Profile extends Component {
                   step={1}
                   min={0}
                   max={100}
-                  onChange={(event: any, newValue: any) => {
+                  onChange={(event, newValue) => {
                     let copyPrefs = {...this.state.user_prefs};
                     copyPrefs.age.optimal_age = newValue;
                     this.setState({ user_prefs: copyPrefs });

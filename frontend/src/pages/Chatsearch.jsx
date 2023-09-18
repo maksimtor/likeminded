@@ -308,31 +308,31 @@ let areas_select = [];
 
 for (const [key, value] of Object.entries(languages.languages)) {
   // languages_select.push({value: l.key, label: l.name})
-  languages_select.push({value: key, label:value.name})
-  console.log("hi")
+  languages_select.push({ value: key, label: value.name });
+  console.log("hi");
 }
 
 for (const [key, value] of Object.entries(languages.continents)) {
   // languages_select.push({value: l.key, label: l.name})
-  areas_select.push({value: key, label:value})
-  console.log("hi")
+  areas_select.push({ value: key, label: value });
+  console.log("hi");
 }
 
 for (const [key, value] of Object.entries(languages.countries)) {
   // languages_select.push({value: l.key, label: l.name})
-  countries_select.push({value: key, label:value.name})
-  areas_select.push({value: key, label:value.name})
-  console.log("hi")
+  countries_select.push({ value: key, label: value.name });
+  areas_select.push({ value: key, label: value.name });
+  console.log("hi");
 }
 
 for (const i in interests) {
   // languages_select.push({value: l.key, label: l.name})
-  interests_select.push({value: interests[i], label:interests[i]})
-  console.log("hi")
+  interests_select.push({ value: interests[i], label: interests[i] });
+  console.log("hi");
 }
 
 class Chatsearch extends Component {
-    static contextType = AuthContext
+  static contextType = AuthContext
 
   state = {
     isLoggedIn: false,
@@ -361,9 +361,9 @@ class Chatsearch extends Component {
     areaRestrictToggle: false,
     areaPref: 10,
     persPref: false,
-    goals:{ value: 'AN', label: 'Anything' },
+    goals: { value: 'AN', label: 'Anything' },
     genderPref: { value: 'A', label: 'Other/Anything' },
-    ageRange:[1,100],
+    ageRange: [1, 100],
     ageOptimal: 25,
     status: 'prepare',
     user_info: {
@@ -378,7 +378,7 @@ class Chatsearch extends Component {
       personality: null,
     },
     user_prefs: {
-      age: {min_age: 18, max_age: 100, optimal_age: 25},
+      age: { min_age: 18, max_age: 100, optimal_age: 25 },
       polit: true,
       interests: true,
       location: true,
@@ -396,12 +396,12 @@ class Chatsearch extends Component {
       message: this.state.value,
       name: this.state.name
     }));
-    this.setState({value: ''})
+    this.setState({ value: '' })
     e.preventDefault();
   }
 
   success = (pos) => {
-    let copyInfo = {...this.state.user_info};
+    let copyInfo = { ...this.state.user_info };
     copyInfo.location = {}
     copyInfo.location.lon = pos.coords.longitude;
     copyInfo.location.lat = pos.coords.latitude;
@@ -409,26 +409,26 @@ class Chatsearch extends Component {
     // this.setState({ geoLat:  });
     // this.setState({ geoLon:  });
   }
-  endChat = (e) => {
+  endChat = () => {
     this.client.close();
     this.setState({ status: 'ended' });
   }
 
   stopSearch = (e) => {
-    this.setState( {status: 'prepare'});
+    this.setState({ status: 'prepare' });
     this.searchClient.close();
     e.preventDefault();
   }
 
-  enterRoom = async(e) => {
-    this.setState({status: 'searching'});
+  enterRoom = async () => {
+    this.setState({ status: 'searching' });
     var state = JSON.parse(JSON.stringify(this.state));
     state['registration'] = false;
     state['user_info']['gender'] = this.state.user_info.gender.value;
     state['user_prefs']['goals'] = this.state.user_prefs.goals.value;
     state['user_prefs']['gender'] = this.state.user_prefs.gender.value;
     var int_values = [];
-    for (var key in state.user_info.interests){
+    for (var key in state.user_info.interests) {
       int_values.push(state.user_info.interests[key].value);
       alert(state.user_info.interests[key].value);
     }
@@ -437,124 +437,106 @@ class Chatsearch extends Component {
       method: 'POST', // или 'PUT'
       body: JSON.stringify(state), // данные могут быть 'строкой' или {объектом}!
       headers: {
-        'Content-Type': 'application/json',}
+        'Content-Type': 'application/json',
+      }
     })
-        .then(response => response.json().then((text) => {
-          let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + text.id + '/');
-          this.searchClient = client;
-          client.onopen = function(e) {
-            client.send(JSON.stringify({
-              type: "message",
-              message: 'Start searching',
-              name: "name"
-            }));
-          };
-          client.onmessage = (message) => {
-            const dataFromServer = JSON.parse(message.data);
-            console.log('got reply! ', dataFromServer.type);
-            if (dataFromServer) {
-              let room = dataFromServer.message;
-              this.setState({ room: room });
-              this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + text.id + '/');
-              this.client.onopen = () => {
-                console.log('WebSocket Client Connected');
-              };
-              this.setState({ status: 'chatting' })
-              this.client.onmessage = (message) => {
-                const dataFromServer = JSON.parse(message.data);
-                console.log('got reply! ', dataFromServer.type);
-                if (dataFromServer) {
-                  if (dataFromServer.type === 'exit_message') {
-                    this.client.close();
-                    this.setState({ isLoggedIn: false });
-                    this.setState({ status: 'ended' });
-                  } else {
-                    this.setState((state) =>
-                      ({
-                        messages: [...state.messages,
-                        {
-                          msg: dataFromServer.message,
-                          name: dataFromServer.name
-                        }]
-                      })
-                    );
-                  }
-                  
+      .then(response => response.json().then((text) => {
+        let client = new W3CWebSocket('ws://localhost:8000/ws/chat_search/' + text.id + '/');
+        this.searchClient = client;
+        client.onopen = function () {
+          client.send(JSON.stringify({
+            type: "message",
+            message: 'Start searching',
+            name: "name"
+          }));
+        };
+        client.onmessage = (message) => {
+          const dataFromServer = JSON.parse(message.data);
+          console.log('got reply! ', dataFromServer.type);
+          if (dataFromServer) {
+            let room = dataFromServer.message;
+            this.setState({ room: room });
+            this.client = new W3CWebSocket('ws://localhost:8000/ws/chat/' + this.state.room + '/' + text.id + '/');
+            this.client.onopen = () => {
+              console.log('WebSocket Client Connected');
+            };
+            this.setState({ status: 'chatting' })
+            this.client.onmessage = (message) => {
+              const dataFromServer = JSON.parse(message.data);
+              console.log('got reply! ', dataFromServer.type);
+              if (dataFromServer) {
+                if (dataFromServer.type === 'exit_message') {
+                  this.client.close();
+                  this.setState({ isLoggedIn: false });
+                  this.setState({ status: 'ended' });
+                } else {
+                  this.setState((state) =>
+                  ({
+                    messages: [...state.messages,
+                    {
+                      msg: dataFromServer.message,
+                      name: dataFromServer.name
+                    }]
+                  })
+                  );
                 }
-              };
-              this.setState({ isLoggedIn: true });
-            }
-          };
-        }));
+
+              }
+            };
+            this.setState({ isLoggedIn: true });
+          }
+        };
+      }));
   }
 
   componentDidMount() {
     this.userData = JSON.parse(localStorage.getItem('user'));
     if (localStorage.getItem('user')) {
-          let gender = this.userData.user_info.gender;
-          var gender_reformed;
-          var i;
-          for (i in genders){
-            if (genders[i].value === gender){
-              gender_reformed = genders[i];
-              this.userData.user_info.gender = gender_reformed;
-              break;
-            }
-          }
+      let gender = this.userData.user_info.gender;
+      var gender_reformed;
+      var i;
+      for (i in genders) {
+        if (genders[i].value === gender) {
+          gender_reformed = genders[i];
+          this.userData.user_info.gender = gender_reformed;
+          break;
+        }
+      }
 
-          let goals_db = this.userData.user_prefs.goals;
-          var goals_reformed;
-          for (i in goals){
-            if (goals[i].value === goals_db){
-              goals_reformed = goals[i];
-              this.userData.user_prefs.goals = goals_reformed;
-              break;
-            }
-          }
+      let goals_db = this.userData.user_prefs.goals;
+      var goals_reformed;
+      for (i in goals) {
+        if (goals[i].value === goals_db) {
+          goals_reformed = goals[i];
+          this.userData.user_prefs.goals = goals_reformed;
+          break;
+        }
+      }
 
-          let gender_pref = this.userData.user_prefs.gender;
-          var gender_pref_reformed;
-          for (i in genders){
-            if (genders[i].value === gender_pref){
-              gender_pref_reformed = genders[i];
-              this.userData.user_prefs.gender = gender_pref_reformed;
-              break;
-            }
-          }
-        this.setState({
-          name: this.userData.name,
-          age: this.userData.age,
-          user_info: this.userData.user_info,
-          user_prefs: this.userData.user_prefs,
-        })
+      let gender_pref = this.userData.user_prefs.gender;
+      var gender_pref_reformed;
+      for (i in genders) {
+        if (genders[i].value === gender_pref) {
+          gender_pref_reformed = genders[i];
+          this.userData.user_prefs.gender = gender_pref_reformed;
+          break;
+        }
+      }
+      this.setState({
+        name: this.userData.name,
+        age: this.userData.age,
+        user_info: this.userData.user_info,
+        user_prefs: this.userData.user_prefs,
+      })
     }
-      // this.client.onopen = () => {
-      //   console.log('WebSocket Client Connected');
-      // };
-      // this.client.onmessage = (message) => {
-      //   const dataFromServer = JSON.parse(message.data);
-      //   console.log('got reply! ', dataFromServer.type);
-      //   if (dataFromServer) {
-      //     this.setState((state) =>
-      //       ({
-      //         messages: [...state.messages,
-      //         {
-      //           msg: dataFromServer.message,
-      //           name: dataFromServer.name,
-      //         }]
-      //       })
-      //     );
-      //   }
-      // };
-    
+
   }
-  
-  componentWillUpdate(nextProps, nextState) {
+
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
     localStorage.setItem('user', JSON.stringify(nextState));
   }
 
   render() {
-    // window.navigator.geolocation.getCurrentPosition(this.success, this.success);
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs">
@@ -577,9 +559,9 @@ class Chatsearch extends Component {
               </>)}
             </Paper>
 
-            { this.state.status === 'ended' ?
-            <div>
-            <span>Chat ended!</span>
+            {this.state.status === 'ended' ?
+              <div>
+                <span>Chat ended!</span>
                 <CustomButton
                   onClick={this.enterRoom}
                   type="button"
@@ -591,35 +573,35 @@ class Chatsearch extends Component {
                   className={classes.submit}
                 >
                   Start Chatting Again!
-                  </CustomButton>
-            </div>
-            :
-            <div>
-            <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
-              <TextField
-                id="outlined-helperText"
-                label="Make a comment"
-                defaultValue="Default Value"
-                variant="outlined"
-                value={this.state.value}
-                fullWidth
-                onChange={e => {
-                  this.setState({ value: e.target.value });
-                  this.value = this.state.value;
-                }}
-              />
-              <CustomButton
-                type="submit"
-                buttonStyle='btn--nrm'
-                buttonSize='btn--large'
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                Start Chatting
                 </CustomButton>
-            </form>
+              </div>
+              :
+              <div>
+                <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
+                  <TextField
+                    id="outlined-helperText"
+                    label="Make a comment"
+                    defaultValue="Default Value"
+                    variant="outlined"
+                    value={this.state.value}
+                    fullWidth
+                    onChange={e => {
+                      this.setState({ value: e.target.value });
+                      this.value = this.state.value;
+                    }}
+                  />
+                  <CustomButton
+                    type="submit"
+                    buttonStyle='btn--nrm'
+                    buttonSize='btn--large'
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                  >
+                    Start Chatting
+                  </CustomButton>
+                </form>
                 <CustomButton
                   onClick={this.endChat}
                   buttonStyle='btn--nrm'
@@ -631,359 +613,354 @@ class Chatsearch extends Component {
                   className={classes.submit}
                 >
                   End chat!
-                  </CustomButton>
+                </CustomButton>
               </div>}
           </div>
 
           : this.state.status === 'prepare' ?
 
-          <div>
-            <div className={classes.paper}>
-              <Typography component="h1" variant="h5">
-                ChattyRooms
+            <div>
+              <div className={classes.paper}>
+                <Typography component="h1" variant="h5">
+                  ChattyRooms
                 </Typography>
-              <h3>Tell us about yourself :)</h3>
-              {this.state.geo}
-              <form className={classes.form} noValidate>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="Username"
-                  label="Username"
-                  type="Username"
-                  id="Username"
-                  value={this.state.name}
-                  onChange={e => {
-                    this.setState({ name: e.target.value });
-                    this.value = this.state.name;
-                  }}
-                />
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="Age"
-                  label="Age"
-                  type="Age"
-                  id="age"
-                  value={this.state.user_info.age}
-                  onChange={e => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.age = e.target.value;
-                    this.setState({ user_info: copyInfo });
-                    this.value = this.state.user_info.age;
-                  }}
-                />
-                <label for="gender">Gender: </label>
-                <Select
-                 value={this.state.user_info.gender}
-                 onChange={(value) => {
-                  let copyInfo = {...this.state.user_info};
-                  copyInfo.gender = value;
-                  this.setState({ user_info: copyInfo });
-                 }}
-                 name="gender"
-                 id="gender"
-                 options={genders}
-                />
-                <label for="inetests">Interests: </label>
-                <Select
-                 value={this.state.user_info.interests}
-                 onChange={(value) => {
-                  let copyInfo = {...this.state.user_info};
-                  copyInfo.interests = value;
-                  this.setState({ user_info: copyInfo });
-                 }}
-                 name="interests"
-                 id="interests"
-                 options={interests_select}
-                 isMulti
-                />
-                <label>Get location: </label>
-                <ToggleButton
-                  value={ this.state.user_info.location }
-                  onToggle={(value) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.location = value ? null : {lon: 0, lat: 0};
-                    this.setState({ user_info: copyInfo });
-                    // this.setState({locToggle: !value,});
-                    if (!this.state.user_info.location) {
-                      window.navigator.geolocation.getCurrentPosition(this.success, this.success)
-                    };
-                  }} />
-                <div>
-                {(() => {
-                  if (this.state.user_info.location) {
-                    return (<>{this.state.user_info.location.lat}:{this.state.user_info.location.lon}</>)
-                  }
-                })()}
-                </div>
-                <p> Political coordinates </p>
-                <ToggleButton
-                  value={ this.state.user_info.polit_coordinates }
-                  onToggle={(value) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.polit_coordinates = value ? null : {eco: 0, cult: 0};
-                    this.setState({ user_info: copyInfo });
-                    // this.setState({polToggle: !value,});
-                    //alert(this.state.polToggle)
-                    //if (!this.state.polToggle) {window.navigator.geolocation.getCurrentPosition(this.success, this.success)};
-                  }} />
-                {(() => {
-                  if (this.state.user_info.polit_coordinates) {
-                    return (<div><p>Are you leaning towards left or right? </p>
-                      <Slider 
-                        value={this.state.user_info.polit_coordinates.eco}
-                        step={1}
-                        marks
-                        min={-10}
-                        max={10}
-                        onChange={(event: any, newValue: any) => {
-                          let copyInfo = {...this.state.user_info};
-                          copyInfo.polit_coordinates.eco = newValue;
-                          this.setState({ user_info: copyInfo });
-                        }} 
+                <h3>Tell us about yourself :)</h3>
+                {this.state.geo}
+                <form className={classes.form} noValidate>
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="Username"
+                    label="Username"
+                    type="Username"
+                    id="Username"
+                    value={this.state.name}
+                    onChange={e => {
+                      this.setState({ name: e.target.value });
+                      this.value = this.state.name;
+                    }}
+                  />
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="Age"
+                    label="Age"
+                    type="Age"
+                    id="age"
+                    value={this.state.user_info.age}
+                    onChange={e => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.age = e.target.value;
+                      this.setState({ user_info: copyInfo });
+                      this.value = this.state.user_info.age;
+                    }}
+                  />
+                  <label htmlFor="gender">Gender: </label>
+                  <Select
+                    value={this.state.user_info.gender}
+                    onChange={(value) => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.gender = value;
+                      this.setState({ user_info: copyInfo });
+                    }}
+                    name="gender"
+                    id="gender"
+                    options={genders}
+                  />
+                  <label htmlFor="interests">Interests: </label>
+                  <Select
+                    value={this.state.user_info.interests}
+                    onChange={(value) => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.interests = value;
+                      this.setState({ user_info: copyInfo });
+                    }}
+                    name="interests"
+                    id="interests"
+                    options={interests_select}
+                    isMulti
+                  />
+                  <label>Get location: </label>
+                  <ToggleButton
+                    value={this.state.user_info.location}
+                    onToggle={(value) => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.location = value ? null : { lon: 0, lat: 0 };
+                      this.setState({ user_info: copyInfo });
+                      // this.setState({locToggle: !value,});
+                      if (!this.state.user_info.location) {
+                        window.navigator.geolocation.getCurrentPosition(this.success, this.success)
+                      }
+                    }} />
+                  <div>
+                    {(() => {
+                      if (this.state.user_info.location) {
+                        return (<>{this.state.user_info.location.lat}:{this.state.user_info.location.lon}</>)
+                      }
+                    })()}
+                  </div>
+                  <p> Political coordinates </p>
+                  <ToggleButton
+                    value={this.state.user_info.polit_coordinates}
+                    onToggle={(value) => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.polit_coordinates = value ? null : { eco: 0, cult: 0 };
+                      this.setState({ user_info: copyInfo });
+                    }} />
+                  {(() => {
+                    if (this.state.user_info.polit_coordinates) {
+                      return (<div><p>Are you leaning towards left or right? </p>
+                        <Slider
+                          value={this.state.user_info.polit_coordinates.eco}
+                          step={1}
+                          marks
+                          min={-10}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.polit_coordinates.eco = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
                         />
-                      <p>Are you leaning towards liberalism or auth? </p>
-                      <Slider 
-                        value={this.state.user_info.polit_coordinates.cult}
-                        step={1}
-                        marks
-                        min={-10}
-                        max={10}
-                        onChange={(event: any, newValue: any) => {
-                          let copyInfo = {...this.state.user_info};
-                          copyInfo.polit_coordinates.cult = newValue;
-                          this.setState({ user_info: copyInfo });
-                        }} 
+                        <p>Are you leaning towards liberalism or auth? </p>
+                        <Slider
+                          value={this.state.user_info.polit_coordinates.cult}
+                          step={1}
+                          marks
+                          min={-10}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.polit_coordinates.cult = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
                         /></div>)
-                  }
-                })()}
+                    }
+                  })()}
 
-                <p> Personality </p>
-                <ToggleButton
-                  value={ this.state.user_info.personality }
-                  onToggle={(value) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality = value ? null : {extraversion: 0, agreeableness: 0, openness: 0, conscientiousness: 0, neuroticism: 0};
-                    this.setState({ user_info: copyInfo });
-                    //alert(this.state.polToggle)
-                    //if (!this.state.polToggle) {window.navigator.geolocation.getCurrentPosition(this.success, this.success)};
-                  }} />
-                {(() => {
-                  if (this.state.user_info.personality) {
-                    return (<div><p> Extraversion </p>
-                <Slider 
-                  value={this.state.user_info.extraversion}
-                  step={1}
-                  marks
-                  min={0}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality.extraversion = newValue;
-                    this.setState({ user_info: copyInfo });
-                  }} 
-                  />
-                <p> Agreeableness </p>
-                <Slider 
-                  value={this.state.user_info.agreeableness}
-                  step={1}
-                  marks
-                  min={0}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality.agreeableness = newValue;
-                    this.setState({ user_info: copyInfo });
-                  }} 
-                  />
-                <p> Openness </p>
-                <Slider 
-                  value={this.state.user_info.openness}
-                  step={1}
-                  marks
-                  min={0}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality.openness = newValue;
-                    this.setState({ user_info: copyInfo });
-                  }} 
-                  />
-                <p> Conscientiousness </p>
-                <Slider 
-                  value={this.state.user_info.conscientiousness}
-                  step={1}
-                  marks
-                  min={0}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality.conscientiousness = newValue;
-                    this.setState({ user_info: copyInfo });
-                  }} 
-                  />
-                <p> Neuroticism </p>
-                <Slider 
-                  value={this.state.user_info.neuroticism}
-                  step={1}
-                  marks
-                  min={0}
-                  max={10}
-                  onChange={(event: any, newValue: any) => {
-                    let copyInfo = {...this.state.user_info};
-                    copyInfo.personality.neuroticism = newValue;
-                    this.setState({ user_info: copyInfo });
-                  }} 
-                  /></div>)
+                  <p> Personality </p>
+                  <ToggleButton
+                    value={this.state.user_info.personality}
+                    onToggle={(value) => {
+                      let copyInfo = { ...this.state.user_info };
+                      copyInfo.personality = value ? null : { extraversion: 0, agreeableness: 0, openness: 0, conscientiousness: 0, neuroticism: 0 };
+                      this.setState({ user_info: copyInfo });
+                    }} />
+                  {(() => {
+                    if (this.state.user_info.personality) {
+                      return (<div><p> Extraversion </p>
+                        <Slider
+                          value={this.state.user_info.extraversion}
+                          step={1}
+                          marks
+                          min={0}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.personality.extraversion = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
+                        />
+                        <p> Agreeableness </p>
+                        <Slider
+                          value={this.state.user_info.agreeableness}
+                          step={1}
+                          marks
+                          min={0}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.personality.agreeableness = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
+                        />
+                        <p> Openness </p>
+                        <Slider
+                          value={this.state.user_info.openness}
+                          step={1}
+                          marks
+                          min={0}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.personality.openness = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
+                        />
+                        <p> Conscientiousness </p>
+                        <Slider
+                          value={this.state.user_info.conscientiousness}
+                          step={1}
+                          marks
+                          min={0}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.personality.conscientiousness = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
+                        />
+                        <p> Neuroticism </p>
+                        <Slider
+                          value={this.state.user_info.neuroticism}
+                          step={1}
+                          marks
+                          min={0}
+                          max={10}
+                          onChange={(event, newValue) => {
+                            let copyInfo = { ...this.state.user_info };
+                            copyInfo.personality.neuroticism = newValue;
+                            this.setState({ user_info: copyInfo });
+                          }}
+                        /></div>)
+                    }
+                  })()}
+
+                  <p> Preferences </p>
+                  <p> Do you want to find a person with similar political beliefs? </p>
+                  <ToggleButton
+                    value={this.state.user_prefs.polit || false}
+                    onToggle={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.polit = !value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }} />
+                  <p> Do you care about person location? </p>
+                  <ToggleButton
+                    value={this.state.user_prefs.location || false}
+                    onToggle={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.location = !value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }} />
+                  <p> Do you want to restrict location area? </p>
+                  <ToggleButton
+                    value={this.state.user_prefs.area_restrict || false}
+                    onToggle={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.area_restrict = !value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }} />
+                  {this.state.user_prefs.area_restrict ?
+                    <div>
+                      <label htmlFor="areaPref">Restrict area: </label>
+                      <Slider
+                        valueLabelDisplay="on"
+                        value={this.state.user_prefs.loc_area}
+                        step={1}
+                        min={0}
+                        max={100}
+                        onChange={(event, newValue) => {
+                          let copyPrefs = { ...this.state.user_prefs };
+                          copyPrefs.loc_area = newValue;
+                          this.setState({ user_prefs: copyPrefs });
+                        }}
+                      />
+                    </div>
+                    :
+                    <div></div>
                   }
-                })()}
-                
-                <p> Preferences </p>
-                <p> Do you want to find a person with similar political beliefs? </p>
-                <ToggleButton
-                  value={ this.state.user_prefs.polit || false }
-                  onToggle={(value) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.polit = !value;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} />
-                <p> Do you care about person location? </p>
-                <ToggleButton
-                  value={ this.state.user_prefs.location || false }
-                  onToggle={(value) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.location = !value;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} />
-                <p> Do you want to restrict location area? </p>
-                <ToggleButton
-                  value={ this.state.user_prefs.area_restrict || false }
-                  onToggle={(value) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.area_restrict = !value;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} />
-                {this.state.user_prefs.area_restrict ?
-                <div>
-                <label for="areaPref">Restrict area: </label>
-                <Slider
-                  valueLabelDisplay="on"
-                  value={this.state.user_prefs.loc_area}
-                  step={1}
-                  min={0}
-                  max={100}
-                  onChange={(event: any, newValue: any) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.loc_area = newValue;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} 
+                  <p> Do you want to find a person with similar interests? </p>
+                  <ToggleButton
+                    value={this.state.user_prefs.interests}
+                    onToggle={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.interests = !value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }} />
+                  <p> Do you want to find a person with similar personality? </p>
+                  <ToggleButton
+                    value={this.state.user_prefs.personality}
+                    onToggle={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.personality = !value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }} />
+                  <label htmlFor="goals">What are your goals? </label>
+                  <Select
+                    value={this.state.user_prefs.goals}
+                    onChange={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.goals = value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }}
+                    name="goals"
+                    id="goals"
+                    options={goals}
                   />
-                </div>
-                :
-                <div></div>
-                }
-                <p> Do you want to find a person with similar interests? </p>
-                <ToggleButton
-                  value={ this.state.user_prefs.interests }
-                  onToggle={(value) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.interests = !value;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} />
-                <p> Do you want to find a person with similar personality? </p>
-                <ToggleButton
-                  value={ this.state.user_prefs.personality}
-                  onToggle={(value) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.personality = !value;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} />
-                <label for="goals">What are your goals? </label>
-                <Select
-                 value={this.state.user_prefs.goals}
-                 onChange={(value) => {
-                  let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.goals = value;
-                    this.setState({ user_prefs: copyPrefs });
-                 }}
-                 name="goals"
-                 id="goals"
-                 options={goals}
-                />
-                <label for="goals">Do you care about gender of the person? </label>
-                <Select
-                 value={this.state.user_prefs.gender}
-                 onChange={(value) => {
-                  let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.gender = value;
-                    this.setState({ user_prefs: copyPrefs });
-                 }}
-                 name="gender"
-                 id="gender"
-                 options={genders}
-                />
-                <p> Age pref: </p>
-                <Slider
-                  getAriaLabel={() => 'Temperature range'}
-                  value={[this.state.user_prefs.age.min_age, this.state.user_prefs.age.max_age]}
-                  valueLabelDisplay="on"
-                  step={1}
-                  min={0}
-                  max={100}
-                  onChange={(event: any, newValue: any) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.age.min_age = newValue[0];
-                    copyPrefs.age.max_age = newValue[1];
-                    this.setState({ user_prefs: copyPrefs });
-                  }} 
+                  <label htmlFor="goals">Do you care about gender of the person? </label>
+                  <Select
+                    value={this.state.user_prefs.gender}
+                    onChange={(value) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.gender = value;
+                      this.setState({ user_prefs: copyPrefs });
+                    }}
+                    name="gender"
+                    id="gender"
+                    options={genders}
                   />
-                <p> Optimal age: </p>
-                <Slider
-                  valueLabelDisplay="on"
-                  value={this.state.user_prefs.age.optimal_age}
-                  step={1}
-                  min={0}
-                  max={100}
-                  onChange={(event: any, newValue: any) => {
-                    let copyPrefs = {...this.state.user_prefs};
-                    copyPrefs.age.optimal_age = newValue;
-                    this.setState({ user_prefs: copyPrefs });
-                  }} 
+                  <p> Age pref: </p>
+                  <Slider
+                    getAriaLabel={() => 'Temperature range'}
+                    value={[this.state.user_prefs.age.min_age, this.state.user_prefs.age.max_age]}
+                    valueLabelDisplay="on"
+                    step={1}
+                    min={0}
+                    max={100}
+                    onChange={(event, newValue) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.age.min_age = newValue[0];
+                      copyPrefs.age.max_age = newValue[1];
+                      this.setState({ user_prefs: copyPrefs });
+                    }}
+                  />
+                  <p> Optimal age: </p>
+                  <Slider
+                    valueLabelDisplay="on"
+                    value={this.state.user_prefs.age.optimal_age}
+                    step={1}
+                    min={0}
+                    max={100}
+                    onChange={(event, newValue) => {
+                      let copyPrefs = { ...this.state.user_prefs };
+                      copyPrefs.age.optimal_age = newValue;
+                      this.setState({ user_prefs: copyPrefs });
+                    }}
                   />
 
-                <Button
-                  onClick={this.enterRoom}
-                  type="button"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                >
-                  Start Chatting
+                  <Button
+                    onClick={this.enterRoom}
+                    type="button"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                  >
+                    Start Chatting
                   </Button>
-                <Grid container>
-                  <Grid item xs>
-                    <Link href="#" variant="body2">
-                      Forgot password?
+                  <Grid container>
+                    <Grid item xs>
+                      <Link href="#" variant="body2">
+                        Forgot password?
                       </Link>
+                    </Grid>
+                    <Grid item>
+                      <Link href="#" variant="body2">
+                        {"Don't have an account? Sign Up"}
+                      </Link>
+                    </Grid>
                   </Grid>
-                  <Grid item>
-                    <Link href="#" variant="body2">
-                      {"Don't have an account? Sign Up"}
-                    </Link>
-                  </Grid>
-                </Grid>
-              </form>
+                </form>
+              </div>
             </div>
-          </div>
-        : this.state.status === 'searching' ?
-                  <div>Searching
-                          <Button
+            : this.state.status === 'searching' ?
+              <div>Searching
+                <Button
                   onClick={this.stopSearch}
                   type="button"
                   fullWidth
@@ -992,8 +969,8 @@ class Chatsearch extends Component {
                   className={classes.submit}
                 >
                   Stop search
-                  </Button></div>
-          : <div></div>
+                </Button></div>
+              : <div></div>
         }
       </Container>
     )

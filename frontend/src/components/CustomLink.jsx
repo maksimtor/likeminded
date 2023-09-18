@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
+import React, { Link } from 'react-router-dom';
 
-const CustomLink = ({children, to, ...props}) => {
+const CustomLink = ({ children, to, ...props }) => {
     return (
         <Link
             className='nav-links'
@@ -12,4 +12,4 @@ const CustomLink = ({children, to, ...props}) => {
     )
 }
 
-export {CustomLink};
+export { CustomLink };

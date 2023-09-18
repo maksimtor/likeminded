@@ -7,7 +7,6 @@ const SIZES = ['btn--medium', 'btn--large'];
 
 export const FreeButton = ({
   children,
-  to,
   type,
   onClick,
   buttonStyle,
@@ -20,12 +19,12 @@ export const FreeButton = ({
   const checkButtonSize = SIZES.includes(buttonSize) ? buttonSize : SIZES[0];
 
   return (
-      <button
-        className={`btn ${checkButtonStyle} ${checkButtonSize}`}
-        onClick={onClick}
-        type={type}
-      >
-        {children}
-      </button>
+    <button
+      className={`btn ${checkButtonStyle} ${checkButtonSize}`}
+      onClick={onClick}
+      type={type}
+    >
+      {children}
+    </button>
   );
 };
