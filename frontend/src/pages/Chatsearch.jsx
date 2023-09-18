@@ -19,6 +19,8 @@ import Slider from '@material-ui/core/Slider';
 
 import { withStyles } from "@material-ui/core/styles";
 import AuthContext from '../context/AuthContext'
+import { FreeButton as CustomButton } from '../components/FreeButton';
+
 
 const useStyles = theme => ({
   paper: {
@@ -557,9 +559,9 @@ class Chatsearch extends Component {
     return (
       <Container component="main" maxWidth="xs">
         {this.state.status === 'chatting' || this.state.status === 'ended' ?
-          <div style={{ marginTop: 50, }}>
+          <div>
             Room Name: {this.state.room}
-            <Paper style={{ height: 500, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
+            <Paper style={{ height: 400, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
               {this.state.messages.map(message => <>
                 <Card className={classes.root}>
                   <CardHeader
@@ -578,16 +580,18 @@ class Chatsearch extends Component {
             { this.state.status === 'ended' ?
             <div>
             <span>Chat ended!</span>
-                <Button
+                <CustomButton
                   onClick={this.enterRoom}
                   type="button"
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                   fullWidth
                   variant="contained"
                   color="primary"
                   className={classes.submit}
                 >
                   Start Chatting Again!
-                  </Button>
+                  </CustomButton>
             </div>
             :
             <div>
@@ -604,18 +608,22 @@ class Chatsearch extends Component {
                   this.value = this.state.value;
                 }}
               />
-              <Button
+              <CustomButton
                 type="submit"
+                buttonStyle='btn--nrm'
+                buttonSize='btn--large'
                 fullWidth
                 variant="contained"
                 color="primary"
                 className={classes.submit}
               >
                 Start Chatting
-                </Button>
+                </CustomButton>
             </form>
-                            <Button
+                <CustomButton
                   onClick={this.endChat}
+                  buttonStyle='btn--nrm'
+                  buttonSize='btn--large'
                   type="button"
                   fullWidth
                   variant="contained"
@@ -623,7 +631,7 @@ class Chatsearch extends Component {
                   className={classes.submit}
                 >
                   End chat!
-                  </Button>
+                  </CustomButton>
               </div>}
           </div>
 

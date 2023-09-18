@@ -51,16 +51,29 @@ const Layout = () => {
             <Outlet />
         </main>
 
-        <footer>&copy; ReactRouter Tutorials 2021</footer>
+        <footer className="container">&copy; ReactRouter Tutorials 2021</footer>
         </>
         )
     }
     else return (
         <>
         <header>
-            <CustomLink to="/">Chat</CustomLink>
-            <CustomLink to="/login">Login</CustomLink>
-            <CustomLink to="/registration">Registration</CustomLink>
+            <nav className='navbar'>
+            <div className='navbar-container'>
+                <CustomLink to='/' className='navbar-logo' onClick={closeMobileMenu}>
+                    TRVL
+                    <i class='fab fa-typo3' />
+                </CustomLink>
+              <div className='menu-icon' onClick={handleClick}>
+                <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+              </div>
+              <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+                <li className='nav-item'><CustomLink to="/" onClick={closeMobileMenu}>Chat</CustomLink></li>
+                <li className='nav-item'> <CustomLink to="/login" onClick={closeMobileMenu}>Log In</CustomLink></li>
+                <li className='nav-item'> <CustomLink to="/registration" onClick={closeMobileMenu}>Registration</CustomLink></li>
+            </ul>
+            </div>
+            </nav>
         </header>
 
         <main className="container">
